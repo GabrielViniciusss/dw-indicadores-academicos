@@ -1,0 +1,43 @@
+id_disciplina,codigo_disciplina,nome_disciplina,carga_horaria,creditos
+1,MAT101,Calculo 1,90,6
+2,MAT102,Algebra Vetorial,60,4
+3,CMP101,Introducao a Programacao,90,6
+4,CMP102,Introducao a Computacao,60,4
+5,MAT103,Matematica Discreta,60,4
+6,MAT104,Calculo 2,90,6
+7,CMP103,Algoritmos e Estruturas de Dados,90,6
+8,CMP104,Logica para Computacao,60,4
+9,CMP105,Programacao Orientada a Objetos,60,4
+10,MAT105,Algebra Linear,60,4
+11,FIS101,Fisica Geral 1,60,4
+12,EST101,Probabilidade e Estatistica,60,4
+13,CMP106,Infraestrutura de Hardware,60,4
+14,CMP107,Banco de Dados,60,4
+15,CMP108,Teoria da Computacao,60,4
+16,CMP109,Paradigmas de Linguagens,60,4
+17,FIS102,Fisica Geral 2,60,4
+18,ELE101,Circuitos Eletricos,60,4
+19,CMP110,Sistemas Operacionais,60,4
+20,CMP111,Redes de Computadores,60,4
+21,CMP112,Engenharia de Software,60,4
+22,CMP113,Analise de Algoritmos,60,4
+23,ELE102,Eletronica Digital,60,4
+24,ADM101,Gestao de Projetos,60,4
+25,CMP114,Compiladores,60,4
+26,CMP115,Inteligencia Artificial,60,4
+27,CMP116,Interface Humano Computador,60,4
+28,CMP117,Data Warehouse,60,4
+29,ELE103,Sinais e Sistemas,60,4
+30,ELE104,Sistemas Embarcados,60,4
+31,ADM102,Empreendedorismo,60,4
+32,CMP118,Computacao Grafica,60,4
+33,CMP119,Seguranca da Informacao,60,4
+34,CMP120,Sistemas Distribuidos,60,4
+35,ELE105,Controle Digital,60,4
+36,CMP121,Aprendizagem de Maquina,60,4
+37,CMP122,Mineracao de Dados,60,4
+38,CMP123,Testes de Software,60,4
+39,HUM101,Aspectos Socioeconomicos,60,4
+40,TCC101,Trabalho de Conclusao 1,60,4
+41,TCC102,Trabalho de Conclusao 2,60,4
+42,EST102,Estagio Supervisionado,120,8

@@ -1,0 +1,4 @@
+id_curso,codigo_curso,nome_curso,departamento,centro,campus,semestres_previstos
+1,CC,Ciencia da Computacao,Centro de Informatica,Centro de Informatica,Recife,9
+2,EC,Engenharia da Computacao,Centro de Informatica,Centro de Informatica,Recife,10
+3,SI,Sistemas de Informacao,Centro de Informatica,Centro de Informatica,Recife,8
