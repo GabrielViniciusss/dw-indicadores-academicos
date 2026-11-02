@@ -26,6 +26,7 @@ sudo dpkg --configure -a
 | Caminho | Conteúdo |
 | --- | --- |
 | `docs/entrega_03_11.pdf` | Entrega da aula de 03/11 |
+| `docs/apresentacao.md` | Roteiro para quem vai apresentar |
 | `docs/mudancas_esquemas.md` | O que mudou em relação aos diagramas do DrawSQL |
 | `docs/dbml/` | Os dois esquemas atualizados em DBML |
 | `sql/01_ddl.sql` | Tabelas, com os ajustes marcados como `[AJUSTE]` |
