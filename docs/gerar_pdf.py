@@ -28,7 +28,7 @@ CONSULTAS = [
     ("C3. Nas disciplinas críticas, como o resultado das matrículas se divide?", "Agregada", "Barras empilhadas em 100%",
      "Cada barra é um todo dividido em partes, e várias pizzas seriam difíceis de comparar. Separar reprovação por nota e por falta importa, porque a primeira aponta dificuldade de conteúdo e a segunda, abandono da disciplina."),
     ("C4. Como as notas se distribuem nas faixas, por curso?", "Agregada", "Colunas por faixa, em % do curso",
-     "As faixas têm ordem, então colunas lado a lado funcionam, e o percentual evita que o curso maior pareça pior. Não é um histograma: a faixa de 3 a 6,9 tem 4 pontos e a de 7 a 7,9 tem 1, então parte da altura vem da largura. Vale deixar isso escrito no painel."),
+     "As faixas têm ordem, então colunas lado a lado funcionam, e o percentual evita que o curso maior pareça pior. Não é um histograma: as faixas seguem a regra da disciplina, e não uma largura fixa. A de 0 a 2,9 é de quem não chega à final, e a de 3 a 6,9 concentra quem vai para ela. Essa faixa tem 4 pontos e a de 7 a 7,9 tem 1, então parte da altura vem da largura. Vale deixar isso escrito no painel."),
     ("C5. Em que semestres cada disciplina crítica ficou pior?", "Agregada", "Mapa de calor (disciplina x semestre)",
      "São duas dimensões e 128 valores. A cor em um só tom destaca os pontos fora do padrão, enquanto 8 linhas sobrepostas ficariam ilegíveis."),
     ("C6. Ofertas com mais faltas reprovam mais?", "Agregada", "Dispersão, um ponto por oferta",
@@ -90,7 +90,7 @@ def rodape(canvas, doc):
 def main():
     h = []
     h.append(Paragraph("Construção dos esquemas", titulo))
-    h.append(Paragraph("Data Warehouse, UFPE. Entrega da aula de 03/11/2026, sobre os esquemas PDFs e PDFs 2.", sub))
+    h.append(Paragraph("Data Warehouse, UFPE. Entrega da aula de 03/11/2026, sobre os esquemas PDFs e PDFs 2.<br/>Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb.", sub))
     h.append(Paragraph(
         "Levantamos 13 consultas sobre as duas estrelas, escolhemos o gráfico de cada uma, ajustamos o que faltava nos "
         "esquemas e povoamos tudo com dados sintéticos. Os scripts rodaram no MySQL 8, o banco definido nos diagramas, "
@@ -119,10 +119,10 @@ def main():
     h.append(KeepTogether(tabela(AJUSTES, [5 * cm, 8.1 * cm, 3 * cm], ["Ajuste", "Por que", "Consultas"])))
     h.append(Spacer(1, 8))
     h.append(Paragraph(
-        "<b>Pendências do grupo.</b> Os novos campos precisam existir nos PDFs de origem; se situação de vínculo ou data de "
-        "saída não aparecerem lá, C9, C10 e C11 perdem a base. Sexo e faixa etária, usados no TCC, não foram incluídos "
-        "porque não sabemos se a fonte traz esses dados. Os diagramas no DrawSQL ainda estão na versão antiga e "
-        "precisam receber os ajustes; o arquivo sql/01_ddl.sql já tem a versão final.", corpo))
+        "<b>Pendências do grupo.</b> Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de "
+        "origem. Se não estiverem, C9, C10 e C11 perdem a base com os dados reais. Sexo e faixa etária, usados no TCC, não "
+        "foram incluídos porque não sabemos se a fonte traz esses dados. Os ajustes nos diagramas do DrawSQL estão listados "
+        "em docs/mudancas_esquemas.md, e o arquivo sql/01_ddl.sql já tem a versão final.", corpo))
 
     h.append(Paragraph("3. Dados sintéticos", secao))
     h.append(Paragraph(
@@ -133,9 +133,10 @@ def main():
     h.append(tabela(VOLUMES, [5.5 * cm, 1.8 * cm, 8.8 * cm], ["Tabela", "Linhas", "Conteúdo"]))
     h.append(Spacer(1, 8))
     h.append(Paragraph(
-        "<b>Regras usadas.</b> Nota a partir de 7 é aprovação por nota, de 5 a 6,99 é aprovação na final e abaixo de 5 é "
-        "reprovação. Mais de 25% da carga horária em faltas reprova por falta. Trancamento fica sem nota e sem faltas, "
-        "e só aprovação soma carga horária. O grupo deve conferir essas regras com a fonte real.", corpo))
+        "<b>Regras usadas.</b> Nota a partir de 7 aprova por nota. Abaixo de 3, o aluno reprova sem ir para a final. De 3 a "
+        "6,99, ele faz a final e precisa de média final de pelo menos 5. Mais de 25% da carga horária em faltas reprova "
+        "por falta. Trancamento fica sem nota e sem faltas, e só aprovação soma carga horária. O gerador não simula a prova "
+        "final em separado: guarda apenas a nota final, e as aprovadas na final ficam entre 5 e 6,99.", corpo))
     h.append(Paragraph(
         "<b>O que estes dados não são.</b> Nenhum número aqui descreve a UFPE. Colocamos de propósito alguns efeitos para o "
         "painel ter o que mostrar: disciplinas com dificuldades diferentes, primeiros períodos mais duros, notas maiores "

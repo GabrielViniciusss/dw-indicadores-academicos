@@ -14,6 +14,13 @@ python3 scripts/exportar_csv.py -uroot -p           # atualiza dados/csv
 
 Sem senha no MySQL, tire o `-p`. No WSL, instale o banco com `sudo apt install mysql-server` e inicie com `sudo service mysql start`. Nesse caso, use `sudo` antes de `./scripts/carregar.sh` e dos outros comandos.
 
+Se a porta 3306 já estiver em uso, por exemplo por um contêiner Docker, a instalação do MySQL falha. Para usar outra porta, crie o arquivo de configuração abaixo e repita a configuração do pacote:
+
+```bash
+printf '[mysqld]\nport = 3310\n' | sudo tee /etc/mysql/mysql.conf.d/zz-porta-dw.cnf
+sudo dpkg --configure -a
+```
+
 ## Estrutura
 
 | Caminho | Conteúdo |
