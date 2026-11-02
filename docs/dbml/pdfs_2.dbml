@@ -1,0 +1,92 @@
+// Diagrama PDFs 2: estrela agregada. [AJUSTE] marca o que foi acrescentado.
+Project pdfs_2 {
+  database_type: 'MySQL'
+}
+
+Table dim_data {
+  id_data bigint [pk]
+  ano smallint
+  semestre smallint
+  ano_semestre varchar(6) [unique]
+}
+
+Table dim_curso {
+  id_curso bigint [pk]
+  codigo_curso varchar(30)
+  nome_curso varchar(160)
+  departamento varchar(120)
+  centro varchar(120)
+  campus varchar(120)
+  semestres_previstos smallint [note: '[AJUSTE] Prazo previsto do curso, em semestres']
+}
+
+Table dim_disciplina {
+  id_disciplina bigint [pk]
+  codigo_disciplina varchar(30)
+  nome_disciplina varchar(160)
+  carga_horaria int
+  creditos int
+}
+
+Table dim_professor {
+  id_professor bigint [pk]
+  matricula_professor varchar(30)
+  nome_professor varchar(160)
+
+  Note: 'Mesma dimensao Professor utilizada pelos 3 papeis da turma.'
+}
+
+Table dim_turma_disciplina {
+  id_turma_disciplina bigint [pk]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  codigo_turma varchar(40)
+  horario varchar(200)
+  id_professor_1 bigint [ref: > dim_professor.id_professor]
+  id_professor_2 bigint [ref: > dim_professor.id_professor]
+  id_professor_3 bigint [ref: > dim_professor.id_professor]
+
+  indexes {
+    (id_disciplina, id_data, codigo_turma) [unique]
+  }
+
+  Note: 'Uma turma ofertada em determinado semestre; professores nos tres papeis abaixo.'
+}
+
+Table fato_professor_disciplina {
+  id_professor_disciplina bigint [pk]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_turma_disciplina bigint [not null, ref: > dim_turma_disciplina.id_turma_disciplina]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  qtd_matriculados int [not null]
+  qtd_aprovacoes_nota int [not null]
+  qtd_aprovacoes_final int [not null]
+  qtd_reprovacoes_nota int [not null]
+  qtd_reprovacoes_faltas int [not null]
+  qtd_trancamentos int [not null, note: '[AJUSTE] Fecha a conta de qtd_matriculados']
+  menor_notas decimal(5,2)
+  maior_notas decimal(5,2)
+  mediana_notas decimal(5,2) [note: 'Nao aditiva: a mediana geral nao vem da mediana das medianas']
+  media_notas decimal(5,2) [note: 'Media final dos alunos da oferta e curso']
+  media_faltas decimal(8,2)
+  soma_notas_finais decimal(14,2) [not null]
+  qtd_notas_validas int [not null]
+  soma_faltas int [not null]
+  qtd_faltas_validas int [not null]
+  qtd_nota_0_2_9 int [not null, note: '0 <= nota_final < 3. Inclui 2,95; nota nula nao entra.']
+  qtd_nota_3_6_9 int [not null, note: '3 <= nota_final < 7. Inclui 6,95.']
+  qtd_nota_7_7_9 int [not null, note: '7 <= nota_final < 8. Inclui 7,95.']
+  qtd_nota_8_8_9 int [not null, note: '8 <= nota_final < 9. Inclui 8,95.']
+  qtd_nota_9_10 int [not null, note: '9 <= nota_final <= 10. Inclui 9,99 e 10,00.']
+  qtd_bolsistas_aprovados_nota int [not null]
+  qtd_bolsistas_aprovados_final int [not null]
+  qtd_bolsistas_reprovados_nota int [not null]
+  qtd_bolsistas_reprovados_faltas int [not null]
+
+  indexes {
+    (id_turma_disciplina, id_curso, id_data) [unique]
+  }
+
+  Note: 'GRAO: uma linha para cada oferta de disciplina x curso dos alunos x semestre. FatoRendimentoDisciplina agregada, SEM aluno individual.'
+}

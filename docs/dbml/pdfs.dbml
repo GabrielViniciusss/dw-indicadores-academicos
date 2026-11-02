@@ -1,0 +1,103 @@
+// Diagrama PDFs: estrela por aluno. [AJUSTE] marca o que foi acrescentado.
+Project pdfs {
+  database_type: 'MySQL'
+}
+
+Table dim_data {
+  id_data bigint [pk]
+  ano smallint
+  semestre smallint
+  ano_semestre varchar(6) [unique]
+
+  Note: 'Periodo letivo do registro: dimensao compartilhada com a segunda estrela.'
+}
+
+Table dim_curso {
+  id_curso bigint [pk]
+  codigo_curso varchar(30)
+  nome_curso varchar(160)
+  departamento varchar(120)
+  centro varchar(120)
+  campus varchar(120)
+  semestres_previstos smallint [note: '[AJUSTE] Prazo previsto do curso, em semestres']
+}
+
+Table dim_disciplina {
+  id_disciplina bigint [pk]
+  codigo_disciplina varchar(30)
+  nome_disciplina varchar(160)
+  carga_horaria int
+  creditos int
+}
+
+Table dim_professor {
+  id_professor bigint [pk]
+  matricula_professor varchar(30)
+  nome_professor varchar(160)
+
+  Note: 'Dimensao reutilizada nos papeis Professor 1, Professor 2, Professor 3.'
+}
+
+Table dim_turma_aluno {
+  id_turma_aluno bigint [pk]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  ano_ingresso smallint
+  semestre_ingresso smallint
+  ano_semestre_ingresso varchar(6)
+
+  Note: 'Coorte de ingresso do aluno: NAO e a turma da disciplina cursada.'
+}
+
+Table dim_aluno {
+  id_aluno bigint [pk]
+  id_turma_aluno bigint [not null, ref: > dim_turma_aluno.id_turma_aluno]
+  numero_matricula varchar(30) [not null, unique]
+  nome varchar(160)
+  forma_ingresso varchar(50)
+  tipo_cota varchar(120)
+  faixa_economica varchar(60)
+  versao_curriculo varchar(60)
+  situacao_vinculo varchar(20) [note: '[AJUSTE] ATIVO, CONCLUIDO ou EVADIDO']
+  id_data_saida bigint [ref: > dim_data.id_data, note: '[AJUSTE] Semestre da saida, nulo se ATIVO']
+
+  Note: 'Aluno e sua coorte de ingresso.'
+}
+
+Table dim_turma_disciplina {
+  id_turma_disciplina bigint [pk]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  codigo_turma varchar(40)
+  horario varchar(200)
+  id_professor_1 bigint [ref: > dim_professor.id_professor]
+  id_professor_2 bigint [ref: > dim_professor.id_professor]
+  id_professor_3 bigint [ref: > dim_professor.id_professor]
+
+  indexes {
+    (id_disciplina, id_data, codigo_turma) [unique]
+  }
+
+  Note: 'Oferta especifica de disciplina no semestre. Os tres IDs de professor representam papeis da MESMA dimensao Professor.'
+}
+
+Table fato_professor_aluno {
+  id_professor_aluno bigint [pk]
+  id_aluno bigint [not null, ref: > dim_aluno.id_aluno]
+  id_turma_disciplina bigint [not null, ref: > dim_turma_disciplina.id_turma_disciplina]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  situacao_final varchar(35) [note: 'APROVADO_NOTA, APROVADO_FINAL, REPROVADO_NOTA, REPROVADO_FALTAS, TRANCADO_DISCIPLINA etc.']
+  nota_final decimal(5,2) [note: 'Media final do aluno nesta tentativa de disciplina']
+  quantidade_faltas int
+  ch_adquirida int [not null]
+  bolsista_no_semestre boolean
+  qtd_tentativas int [not null]
+  periodo_aluno smallint [not null, note: '[AJUSTE] Semestres desde o ingresso; o primeiro semestre e 1']
+
+  indexes {
+    (id_aluno, id_turma_disciplina, id_curso) [unique]
+  }
+
+  Note: 'GRAO: 1 linha para cada aluno x oferta da disciplina x curso. A matricula nao e duplicada se houver dois ou tres professores.'
+}
