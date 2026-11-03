@@ -1,0 +1,159 @@
+// Projeto completo: as duas estrelas no mesmo esquema. [AJUSTE] marca o que foi acrescentado aos diagramas originais.
+Project dw_academico {
+  database_type: 'MySQL'
+}
+
+Table dim_data {
+  id_data bigint [pk]
+  ano smallint
+  semestre smallint
+  ano_semestre varchar(6) [unique]
+
+  Note: 'Periodo letivo do registro: dimensao compartilhada com a segunda estrela.'
+}
+
+Table dim_curso {
+  id_curso bigint [pk]
+  codigo_curso varchar(30)
+  nome_curso varchar(160)
+  departamento varchar(120)
+  centro varchar(120)
+  campus varchar(120)
+  semestres_previstos smallint [note: '[AJUSTE] Prazo previsto do curso, em semestres']
+}
+
+Table dim_disciplina {
+  id_disciplina bigint [pk]
+  codigo_disciplina varchar(30)
+  nome_disciplina varchar(160)
+  carga_horaria int
+  creditos int
+}
+
+Table dim_professor {
+  id_professor bigint [pk]
+  matricula_professor varchar(30)
+  nome_professor varchar(160)
+
+  Note: 'Dimensao reutilizada nos papeis Professor 1, Professor 2 e Professor 3.'
+}
+
+Table dim_turma_disciplina {
+  id_turma_disciplina bigint [pk]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  codigo_turma varchar(40)
+  horario varchar(200)
+  id_professor_1 bigint [ref: > dim_professor.id_professor]
+  id_professor_2 bigint [ref: > dim_professor.id_professor]
+  id_professor_3 bigint [ref: > dim_professor.id_professor]
+
+  indexes {
+    (id_disciplina, id_data, codigo_turma) [unique]
+  }
+
+  Note: 'Oferta especifica de disciplina no semestre. Os tres IDs de professor representam papeis da MESMA dimensao Professor.'
+}
+
+Table dim_turma_aluno {
+  id_turma_aluno bigint [pk]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  ano_ingresso smallint
+  semestre_ingresso smallint
+  ano_semestre_ingresso varchar(6)
+
+  Note: 'Coorte de ingresso do aluno: NAO e a turma da disciplina cursada.'
+}
+
+Table dim_aluno {
+  id_aluno bigint [pk]
+  id_turma_aluno bigint [not null, ref: > dim_turma_aluno.id_turma_aluno]
+  numero_matricula varchar(30) [not null, unique]
+  nome varchar(160)
+  forma_ingresso varchar(50)
+  tipo_cota varchar(120)
+  faixa_economica varchar(60)
+  versao_curriculo varchar(60)
+  situacao_vinculo varchar(20) [note: '[AJUSTE] ATIVO, CONCLUIDO ou EVADIDO']
+  id_data_saida bigint [ref: > dim_data.id_data, note: '[AJUSTE] Semestre da saida, nulo se ATIVO']
+
+  Note: 'Aluno e sua coorte de ingresso.'
+}
+
+Table fato_professor_aluno {
+  id_professor_aluno bigint [pk]
+  id_aluno bigint [not null, ref: > dim_aluno.id_aluno]
+  id_turma_disciplina bigint [not null, ref: > dim_turma_disciplina.id_turma_disciplina]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  situacao_final varchar(35) [note: 'APROVADO_NOTA, APROVADO_FINAL, REPROVADO_NOTA, REPROVADO_FALTAS, TRANCADO_DISCIPLINA etc.']
+  nota_final decimal(5,2) [note: 'Media final do aluno nesta tentativa de disciplina']
+  quantidade_faltas int
+  ch_adquirida int [not null]
+  bolsista_no_semestre boolean
+  qtd_tentativas int [not null]
+  periodo_aluno smallint [not null, note: '[AJUSTE] Semestres desde o ingresso; o primeiro semestre e 1']
+
+  indexes {
+    (id_aluno, id_turma_disciplina, id_curso) [unique]
+  }
+
+  Note: 'GRAO: 1 linha para cada aluno x oferta da disciplina x curso. A matricula nao e duplicada se houver dois ou tres professores.'
+}
+
+Table fato_professor_disciplina {
+  id_professor_disciplina bigint [pk]
+  id_disciplina bigint [not null, ref: > dim_disciplina.id_disciplina]
+  id_turma_disciplina bigint [not null, ref: > dim_turma_disciplina.id_turma_disciplina]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  qtd_matriculados int [not null]
+  qtd_aprovacoes_nota int [not null]
+  qtd_aprovacoes_final int [not null]
+  qtd_reprovacoes_nota int [not null]
+  qtd_reprovacoes_faltas int [not null]
+  qtd_trancamentos int [not null, note: '[AJUSTE] Fecha a conta de qtd_matriculados']
+  menor_notas decimal(5,2)
+  maior_notas decimal(5,2)
+  mediana_notas decimal(5,2) [note: 'Nao aditiva: a mediana geral nao vem da mediana das medianas']
+  media_notas decimal(5,2) [note: 'Media final dos alunos da oferta e curso']
+  media_faltas decimal(8,2)
+  soma_notas_finais decimal(14,2) [not null]
+  qtd_notas_validas int [not null]
+  soma_faltas int [not null]
+  qtd_faltas_validas int [not null]
+  qtd_nota_0_2_9 int [not null, note: '0 <= nota_final < 3. Inclui 2,95; nota nula nao entra.']
+  qtd_nota_3_6_9 int [not null, note: '3 <= nota_final < 7. Inclui 6,95.']
+  qtd_nota_7_7_9 int [not null, note: '7 <= nota_final < 8. Inclui 7,95.']
+  qtd_nota_8_8_9 int [not null, note: '8 <= nota_final < 9. Inclui 8,95.']
+  qtd_nota_9_10 int [not null, note: '9 <= nota_final <= 10. Inclui 9,99 e 10,00.']
+  qtd_bolsistas_aprovados_nota int [not null]
+  qtd_bolsistas_aprovados_final int [not null]
+  qtd_bolsistas_reprovados_nota int [not null]
+  qtd_bolsistas_reprovados_faltas int [not null]
+
+  indexes {
+    (id_turma_disciplina, id_curso, id_data) [unique]
+  }
+
+  Note: 'GRAO: uma linha para cada oferta de disciplina x curso dos alunos x semestre. FatoRendimentoDisciplina agregada, SEM aluno individual.'
+}
+
+TableGroup dimensoes_compartilhadas {
+  dim_data
+  dim_curso
+  dim_disciplina
+  dim_professor
+  dim_turma_disciplina
+}
+
+TableGroup estrela_por_aluno {
+  fato_professor_aluno
+  dim_aluno
+  dim_turma_aluno
+}
+
+TableGroup estrela_agregada {
+  fato_professor_disciplina
+}
