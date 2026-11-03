@@ -28,7 +28,7 @@ sudo dpkg --configure -a
 | `docs/entrega_03_11.pdf` | Entrega da aula de 03/11 |
 | `docs/apresentacao.md` | Roteiro para quem vai apresentar |
 | `docs/mudancas_esquemas.md` | O que mudou em relação aos diagramas do DrawSQL |
-| `docs/dbml/` | Os dois esquemas atualizados em DBML |
+| `docs/dbml/dw_academico.dbml` | O esquema completo em DBML, com as duas estrelas |
 | `sql/01_ddl.sql` | Tabelas, com os ajustes marcados como `[AJUSTE]` |
 | `sql/02_dados_sinteticos.sql` | Dados gerados |
 | `sql/03_carga_fato_agregada.sql` | Deriva a fato agregada da fato por aluno |
