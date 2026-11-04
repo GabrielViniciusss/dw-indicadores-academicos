@@ -192,3 +192,69 @@ GROUP BY d.nome_disciplina
 HAVING COUNT(*) >= 2
 ORDER BY diferenca_pontos DESC
 LIMIT 10;
+
+-- C8. Grade de horarios: quais horarios concentram mais faltas e reprovacao por falta do que o esperado?
+WITH base AS (
+  SELECT f.id_disciplina, t.horario, f.id_turma_disciplina, f.qtd_matriculados, f.qtd_trancamentos,
+         f.qtd_reprovacoes_faltas, f.soma_faltas, f.qtd_faltas_validas,
+         f.qtd_matriculados - f.qtd_trancamentos AS com_resultado
+  FROM fato_professor_disciplina f
+  JOIN dim_turma_disciplina t ON t.id_turma_disciplina = f.id_turma_disciplina
+  WHERE f.id_data >= 20231
+),
+por_disciplina AS (
+  SELECT id_disciplina, SUM(qtd_reprovacoes_faltas) / NULLIF(SUM(com_resultado), 0) AS taxa_disciplina
+  FROM base
+  GROUP BY id_disciplina
+)
+SELECT b.horario, COUNT(DISTINCT b.id_turma_disciplina) AS turmas, SUM(b.qtd_matriculados) AS matriculas,
+       ROUND(SUM(b.soma_faltas) / NULLIF(SUM(b.qtd_faltas_validas), 0), 2) AS media_faltas,
+       ROUND(100 * SUM(b.qtd_trancamentos) / SUM(b.qtd_matriculados), 1) AS pct_trancamento,
+       ROUND(100 * SUM(b.qtd_reprovacoes_faltas) / SUM(b.com_resultado), 1) AS reprovacao_falta,
+       ROUND(100 * SUM(b.com_resultado * d.taxa_disciplina) / SUM(b.com_resultado), 1) AS reprovacao_falta_esperada,
+       ROUND(100 * (SUM(b.qtd_reprovacoes_faltas) - SUM(b.com_resultado * d.taxa_disciplina)) / SUM(b.com_resultado), 1) AS diferenca_pontos
+FROM base b
+JOIN por_disciplina d ON d.id_disciplina = b.id_disciplina
+GROUP BY b.horario
+ORDER BY diferenca_pontos DESC;
+
+-- C9. Nivelamento: quais grupos de ingresso chegam ao 2o ano com mais dificuldade?
+WITH alunos AS (
+  SELECT a.id_aluno, COALESCE(a.tipo_cota, 'Outras formas de ingresso') AS grupo_ingresso,
+         a.situacao_vinculo = 'EVADIDO'
+         AND ds.ano * 2 + ds.semestre - (t.ano_ingresso * 2 + t.semestre_ingresso) + 1 <= 4 AS evadiu_ate_4
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  LEFT JOIN dim_data ds ON ds.id_data = a.id_data_saida
+  WHERE t.ano_ingresso * 2 + t.semestre_ingresso BETWEEN 2018 * 2 + 1 AND 2023 * 2 + 2
+),
+primeiro_ano AS (
+  SELECT id_aluno, SUM(situacao_final LIKE 'REPROVADO%') AS reprovacoes,
+         SUM(situacao_final <> 'TRANCADO_DISCIPLINA') AS com_resultado, SUM(ch_adquirida) AS ch
+  FROM fato_professor_aluno
+  WHERE periodo_aluno <= 2
+  GROUP BY id_aluno
+)
+SELECT x.grupo_ingresso, COUNT(*) AS alunos,
+       ROUND(100 * SUM(p.reprovacoes) / SUM(p.com_resultado), 1) AS reprovacao_primeiro_ano,
+       ROUND(AVG(p.ch)) AS carga_horaria_media_primeiro_ano,
+       ROUND(100 * SUM(COALESCE(x.evadiu_ate_4, 0)) / COUNT(*), 1) AS evasao_ate_4o_semestre
+FROM alunos x
+JOIN primeiro_ano p ON p.id_aluno = x.id_aluno
+GROUP BY x.grupo_ingresso
+ORDER BY alunos DESC;
+
+-- C10. Tipo de reforco: em quais disciplinas as notas ficam mais abaixo de 7, e em que faixa?
+SELECT d.nome_disciplina, SUM(f.qtd_matriculados) AS matriculas,
+       ROUND(SUM(f.soma_notas_finais) / SUM(f.qtd_notas_validas), 2) AS media_notas,
+       ROUND(100 * SUM(f.qtd_nota_0_2_9) / SUM(f.qtd_notas_validas), 1) AS pct_abaixo_de_3,
+       ROUND(100 * SUM(f.qtd_nota_3_6_9) / SUM(f.qtd_notas_validas), 1) AS pct_3_a_6_99,
+       ROUND(100 * SUM(f.qtd_nota_7_7_9 + f.qtd_nota_8_8_9 + f.qtd_nota_9_10) / SUM(f.qtd_notas_validas), 1) AS pct_7_ou_mais,
+       ROUND(100 * SUM(f.qtd_aprovacoes_final) / NULLIF(SUM(f.qtd_aprovacoes_nota + f.qtd_aprovacoes_final), 0), 1) AS pct_aprovados_na_final
+FROM fato_professor_disciplina f
+JOIN dim_disciplina d ON d.id_disciplina = f.id_disciplina
+WHERE f.id_data >= 20231
+GROUP BY d.nome_disciplina
+HAVING SUM(f.qtd_matriculados) >= 100
+ORDER BY pct_7_ou_mais ASC
+LIMIT 10;
