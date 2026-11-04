@@ -8,13 +8,12 @@ WITH agregada AS (
          SUM(qtd_matriculados - qtd_trancamentos) AS com_resultado,
          SUM(qtd_reprovacoes_nota) AS por_nota, SUM(qtd_reprovacoes_faltas) AS por_falta
   FROM fato_professor_disciplina
-  WHERE id_data >= 20231
   GROUP BY id_disciplina
 ),
 repetentes AS (
   SELECT id_disciplina, COUNT(*) AS matriculas_repetentes
   FROM fato_professor_aluno
-  WHERE id_data >= 20231 AND qtd_tentativas >= 2
+  WHERE qtd_tentativas >= 2
   GROUP BY id_disciplina
 )
 SELECT d.nome_disciplina, a.matriculas, a.por_nota + a.por_falta AS reprovacoes,
@@ -24,7 +23,6 @@ SELECT d.nome_disciplina, a.matriculas, a.por_nota + a.por_falta AS reprovacoes,
 FROM agregada a
 JOIN dim_disciplina d ON d.id_disciplina = a.id_disciplina
 LEFT JOIN repetentes r ON r.id_disciplina = a.id_disciplina
-WHERE a.matriculas >= 100
 ORDER BY reprovacoes DESC;
 
 -- C2. Oferta: quantas turmas extras cada disciplina precisa para absorver quem ficou para tras?
@@ -178,7 +176,6 @@ WITH por_professor AS (
              / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0) AS taxa
   FROM fato_professor_disciplina f
   JOIN vw_turma_professor tp ON tp.id_turma_disciplina = f.id_turma_disciplina
-  WHERE f.id_data >= 20231
   GROUP BY f.id_disciplina, tp.id_professor
   HAVING SUM(f.qtd_matriculados) >= 30
 )
@@ -200,7 +197,6 @@ WITH base AS (
          f.qtd_matriculados - f.qtd_trancamentos AS com_resultado
   FROM fato_professor_disciplina f
   JOIN dim_turma_disciplina t ON t.id_turma_disciplina = f.id_turma_disciplina
-  WHERE f.id_data >= 20231
 ),
 por_disciplina AS (
   SELECT id_disciplina, SUM(qtd_reprovacoes_faltas) / NULLIF(SUM(com_resultado), 0) AS taxa_disciplina
@@ -253,8 +249,6 @@ SELECT d.nome_disciplina, SUM(f.qtd_matriculados) AS matriculas,
        ROUND(100 * SUM(f.qtd_aprovacoes_final) / NULLIF(SUM(f.qtd_aprovacoes_nota + f.qtd_aprovacoes_final), 0), 1) AS pct_aprovados_na_final
 FROM fato_professor_disciplina f
 JOIN dim_disciplina d ON d.id_disciplina = f.id_disciplina
-WHERE f.id_data >= 20231
 GROUP BY d.nome_disciplina
-HAVING SUM(f.qtd_matriculados) >= 100
 ORDER BY pct_7_ou_mais ASC
 LIMIT 10;
