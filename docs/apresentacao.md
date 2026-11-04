@@ -1,4 +1,4 @@
-# Guia da apresentação de 03/11
+# Guia da apresentação
 
 Roteiro para quem vai apresentar a construção dos esquemas. O enunciado não define tempo nem formato, então a divisão abaixo é uma sugestão para cerca de 10 minutos. Se o tempo for menor, mantenha as partes 1, 2 e 3.
 
@@ -28,15 +28,15 @@ Roteiro para quem vai apresentar a construção dos esquemas. O enunciado não d
 
 **Mostrar:** a seção 1 do PDF.
 
-**Falar:** levantamos 13 consultas e vamos apresentar três exemplos. Os gráficos prontos ficam para a entrega de 05/11; hoje mostramos a escolha e o motivo.
+**Falar:** depois do retorno do professor, trocamos 13 consultas por 7, cada uma ligada a uma decisão de gestão. Cada descrição diz a população, o período, as medidas e os agrupamentos, e nenhuma se responde com sim ou não. Vamos apresentar três exemplos.
 
-| Consulta | Gráfico | Argumento |
+| Consulta | Decisão | Gráfico e motivo |
 | --- | --- | --- |
-| C1. Como a taxa de aprovação evoluiu a cada semestre, por curso? | Linhas, uma por curso | O tempo é contínuo e ordenado, e a linha mostra a tendência. Em colunas, seriam 48 barras difíceis de seguir. |
-| C5. Em que semestres cada disciplina crítica ficou pior? | Mapa de calor | São duas dimensões e 128 valores. A cor destaca os pontos fora do padrão, e 8 linhas sobrepostas ficariam ilegíveis. |
-| C9. O que aconteceu com cada coorte de ingresso? | Barras empilhadas em 100% | Cada coorte soma 100%. A parte de ativos evita concluir que as coortes recentes vão mal, quando elas apenas ainda estão no curso. |
+| C1. Volume e taxa de reprovação por disciplina, de 2023.1 a 2025.2 | Onde colocar as vagas de monitoria | Dispersão: um ranking só pela taxa destacaria disciplinas pequenas. O quadrante de muitas matrículas e taxa alta é a prioridade. |
+| C3. Evasão posterior, conforme as reprovações no 1º ano | A partir de quantas reprovações chamar o aluno para a tutoria | Colunas por curso: as categorias são ordenadas, e o que importa é onde a evasão salta. |
+| C4. Evasão acumulada até cada semestre do curso | Em que momento concentrar as ações de permanência | Linhas: a inclinação mostra quando a evasão acontece. |
 
-**Se perguntarem sobre as outras:** todas estão no PDF, cada uma com o motivo do gráfico.
+**Se perguntarem sobre as outras:** todas estão no PDF, com a decisão e o motivo do gráfico.
 
 ## Parte 3: ajustes nos esquemas (2 min)
 
@@ -61,24 +61,24 @@ Roteiro para quem vai apresentar a construção dos esquemas. O enunciado não d
 - O gerador simula cada aluno semestre a semestre, de 2018.1 a 2025.2: são 1.433 alunos e 30.992 matrículas.
 - A fato agregada é calculada em SQL a partir da fato por aluno, então as duas estrelas sempre fecham.
 - Rodamos 15 testes de consistência, e todos deram zero erros.
-- **Os dados são fictícios.** Colocamos alguns padrões de propósito para o painel ter o que mostrar, e nenhum número descreve a UFPE.
+- **Os dados são fictícios.** Colocamos alguns padrões de propósito para testar as consultas, e nenhum número descreve a UFPE.
 
 **Opção A: rodar no banco.** Precisa do MySQL com os dados carregados, como explica o `README.md`:
 
 ```bash
 sudo service mysql start
-sudo mysql dw_academico --table -e "SELECT di.nome_disciplina, SUM(f.qtd_matriculados) AS matriculados, ROUND(100 * SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas) / SUM(f.qtd_matriculados - f.qtd_trancamentos), 1) AS taxa_reprovacao FROM fato_professor_disciplina f JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina GROUP BY di.nome_disciplina HAVING SUM(f.qtd_matriculados) >= 100 ORDER BY taxa_reprovacao DESC LIMIT 10;"
+sudo mysql --table < sql/05_consultas.sql | less
 ```
 
-**Opção B: mostrar o resultado pronto.** É a saída da consulta C2:
+**Opção B: mostrar o resultado pronto.** São as cinco primeiras linhas da consulta C1:
 
-| Disciplina | Matriculados | Taxa de reprovação (%) |
-| --- | ---: | ---: |
-| Cálculo 1 | 1.229 | 47,3 |
-| Introdução à Programação | 1.637 | 41,3 |
-| Física Geral 1 | 447 | 38,8 |
-| Algoritmos e Estruturas de Dados | 1.436 | 38,5 |
-| Álgebra Vetorial | 1.521 | 37,5 |
+| Disciplina | Matrículas | Reprovações | Taxa de reprovação (%) |
+| --- | ---: | ---: | ---: |
+| Introdução à Programação | 637 | 268 | 43,7 |
+| Algoritmos e Estruturas de Dados | 562 | 228 | 42,4 |
+| Cálculo 1 | 456 | 209 | 47,4 |
+| Álgebra Vetorial | 566 | 201 | 36,9 |
+| Matemática Discreta | 521 | 183 | 36,5 |
 
 Também dá para abrir `dados/csv/fato_professor_aluno.csv` no GitHub para mostrar os dados linha a linha.
 
@@ -86,8 +86,8 @@ Também dá para abrir `dados/csv/fato_professor_aluno.csv` no GitHub para mostr
 
 **Falar:**
 
-- Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de origem. Se não estiverem, as consultas C9, C10 e C11 ficam sem base nos dados reais.
-- Na entrega de 05/11, vamos transformar essas consultas em painéis, usando os mesmos dados.
+- Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de origem. Cinco das sete consultas dependem desses campos: C2, C3, C4, C5 e C6.
+- O próximo passo é transformar essas consultas em painéis, usando os mesmos dados.
 
 ## Perguntas que podem aparecer
 
@@ -97,26 +97,26 @@ Elas têm grãos diferentes. A fato por aluno permite ver o percurso de cada um,
 **A agregada não é redundante?**
 É, de propósito. Ela é uma tabela pré-calculada, derivada da fato por aluno, e os testes conferem se os totais das duas batem.
 
-**Por que não dá para tirar a média das médias?**
-Porque turmas pequenas pesariam igual às grandes. Por isso a média geral é `soma_notas_finais / qtd_notas_validas`. A mediana não se agrega, e precisa ser calculada sobre as notas individuais.
+**O que mudou nas consultas depois do retorno do professor?**
+Saíram as consultas básicas e as que se respondiam com sim ou não. Cada uma das sete agora diz qual decisão apoia e descreve população, período, medidas e agrupamentos.
 
-**Por que as faixas de nota têm larguras diferentes?**
-Elas seguem a regra da disciplina: abaixo de 3 o aluno não vai para a final, e de 3 a 6,99 ele faz a final. Por isso o gráfico da C4 é de colunas por faixa, e não um histograma de verdade.
+**Por que a C3 só conta quem chegou ao fim do 2º semestre?**
+Porque a decisão da tutoria seria tomada nesse momento. Quem já tinha evadido não poderia mais ser chamado, e a evasão dele distorceria o critério.
 
-**Por que `periodo_aluno`, e não o período ideal da disciplina?**
-Ele é calculado a partir da coorte e do semestre da matrícula, então dispensa uma tabela de matriz curricular por curso. Ele mede quando o aluno cursou, não quando deveria ter cursado.
+**Por que a C4 usa só as turmas de 2018.1 a 2020.1?**
+Porque só elas têm 12 semestres de histórico. Com as mesmas turmas em todos os pontos, a curva não muda apenas porque os alunos observados mudaram.
 
 **Quais são as regras de aprovação?**
 Nota a partir de 7 aprova direto. Abaixo de 3 reprova sem final. De 3 a 6,99 faz a final e precisa de média final de pelo menos 5. Mais de 25% da carga horária em faltas reprova por falta. O gerador guarda só a nota final, sem simular a prova em separado.
 
 **Por que a evasão está tão alta nos dados?**
-Porque esse é um resultado do gerador, e não uma medição. Algumas coortes passam de 50%, e esse número não deve ser lido como a evasão real de nenhum curso.
+Porque esse é um resultado do gerador, e não uma medição. Esse número não deve ser lido como a evasão real de nenhum curso.
 
-**Os bolsistas aprovam mais?**
-Não dá para concluir isso com estes dados. No gerador só há bolsa a partir do 2º período, então o grupo sem bolsa inclui os calouros, que reprovam mais.
+**A assistência estudantil aumenta a aprovação?**
+Não dá para concluir isso com estes dados. No gerador, o benefício não influencia o resultado, e as diferenças da C6 são acaso. Com dados reais, a consulta mostraria uma associação, não um efeito.
 
-**Por que comparar professores só dentro da mesma disciplina?**
-Porque um ranking geral puniria quem ensina as disciplinas mais difíceis.
+**A C7 serve para avaliar professores?**
+Não. Ela aponta disciplinas em que vale alinhar critérios. Nos dados sintéticos, o professor não influencia o resultado, então as diferenças são acaso.
 
 **O que acontece se os campos novos não existirem na fonte real?**
-As consultas de coorte e tempo de conclusão não poderiam ser feitas com os dados reais. As outras dez continuam valendo.
+Só C1 e C7 continuam funcionando como estão. As outras cinco precisariam de outra fonte para a situação do aluno.

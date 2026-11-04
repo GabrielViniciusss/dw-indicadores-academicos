@@ -18,7 +18,7 @@ CREATE TABLE dim_curso (
   departamento VARCHAR(120),
   centro VARCHAR(120),
   campus VARCHAR(120),
-  semestres_previstos SMALLINT -- [AJUSTE] prazo do curso, base da consulta 11
+  semestres_previstos SMALLINT -- [AJUSTE] prazo do curso, base da consulta C5
 );
 
 CREATE TABLE dim_disciplina (
@@ -89,7 +89,7 @@ CREATE TABLE fato_professor_aluno (
   ch_adquirida INT NOT NULL,
   bolsista_no_semestre BOOLEAN,
   qtd_tentativas INT NOT NULL,
-  periodo_aluno SMALLINT NOT NULL, -- [AJUSTE] semestres desde o ingresso, base da consulta 8
+  periodo_aluno SMALLINT NOT NULL, -- [AJUSTE] semestres desde o ingresso, base das consultas C3 e C6
   UNIQUE KEY uq_matricula (id_aluno, id_turma_disciplina, id_curso),
   FOREIGN KEY (id_aluno) REFERENCES dim_aluno (id_aluno),
   FOREIGN KEY (id_turma_disciplina) REFERENCES dim_turma_disciplina (id_turma_disciplina),

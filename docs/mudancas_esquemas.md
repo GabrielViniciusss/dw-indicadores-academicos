@@ -8,11 +8,11 @@ Os diagramas ainda não foram alterados. Eles precisam receber os acréscimos ab
 
 | # | Onde | Mudança | Diagrama | Consultas |
 | --- | --- | --- | --- | --- |
-| 1 | `dim_curso` | Nova coluna `semestres_previstos` | PDFs e PDFs 2 | C11 |
-| 2 | `dim_aluno` | Nova coluna `situacao_vinculo` | PDFs | C9, C10, C11 |
-| 3 | `dim_aluno` | Nova coluna `id_data_saida`, com relação para `dim_data` | PDFs | C11 |
-| 4 | `fato_professor_aluno` | Nova coluna `periodo_aluno` | PDFs | C8 |
-| 5 | `fato_professor_disciplina` | Nova coluna `qtd_trancamentos` | PDFs 2 | C1, C2, C3, C5, C6, C7, C13 |
+| 1 | `dim_curso` | Nova coluna `semestres_previstos` | PDFs e PDFs 2 | C5 |
+| 2 | `dim_aluno` | Nova coluna `situacao_vinculo` | PDFs | C2, C3, C4, C5, C6 |
+| 3 | `dim_aluno` | Nova coluna `id_data_saida`, com relação para `dim_data` | PDFs | C3, C4 |
+| 4 | `fato_professor_aluno` | Nova coluna `periodo_aluno` | PDFs | C3, C6 |
+| 5 | `fato_professor_disciplina` | Nova coluna `qtd_trancamentos` | PDFs 2 | C1, C7 |
 | 6 | Banco | Nova view `vw_turma_professor` | Só no SQL | C7 |
 
 Nenhuma tabela ou coluna foi removida ou renomeada. Os grãos, as chaves primárias, os índices únicos e as relações que já existiam continuam iguais.
@@ -33,7 +33,7 @@ No diagrama PDFs, crie também a relação `dim_aluno.id_data_saida` para `dim_d
 
 ## Por que cada mudança foi feita
 
-- **`semestres_previstos`:** cada curso tem um prazo diferente, e sem ele não há com o que comparar o tempo de conclusão.
+- **`semestres_previstos`:** cada curso tem um prazo diferente, e sem ele não há como saber quem está atrasado.
 - **`situacao_vinculo` e `id_data_saida`:** o esquema registrava as matrículas, mas não dizia quem concluiu ou evadiu, nem quando. A evasão não pode ser deduzida só pela falta de matrícula, porque o aluno pode estar apenas sem cursar nada naquele semestre.
 - **`periodo_aluno`:** mostra em que momento do curso a matrícula aconteceu. É calculado na carga a partir da coorte do aluno e do semestre da matrícula, então dispensa uma tabela de matriz curricular por curso.
 - **`qtd_trancamentos`:** as quatro contagens de situação não fechavam com `qtd_matriculados` quando havia trancamento. Agora vale: `qtd_matriculados = qtd_aprovacoes_nota + qtd_aprovacoes_final + qtd_reprovacoes_nota + qtd_reprovacoes_faltas + qtd_trancamentos`.

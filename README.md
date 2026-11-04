@@ -8,7 +8,7 @@ Precisa de MySQL 8 e Python 3, sem bibliotecas extras.
 
 ```bash
 ./scripts/carregar.sh -uroot -p                     # cria o banco, gera os dados e valida
-mysql -uroot -p --table < sql/05_consultas.sql      # roda as 13 consultas
+mysql -uroot -p --table < sql/05_consultas.sql      # roda as 7 consultas
 python3 scripts/exportar_csv.py -uroot -p           # atualiza dados/csv
 ```
 
@@ -33,7 +33,7 @@ sudo dpkg --configure -a
 | `sql/02_dados_sinteticos.sql` | Dados gerados |
 | `sql/03_carga_fato_agregada.sql` | Deriva a fato agregada da fato por aluno |
 | `sql/04_views.sql` | Ponte entre professor e turma |
-| `sql/05_consultas.sql` | Consultas analíticas C1 a C13 |
+| `sql/05_consultas.sql` | Consultas de apoio à decisão, C1 a C7 |
 | `sql/06_validacao.sql` | Testes, todos devem dar zero erros |
 | `gerador/gerar_dados.py` | Gerador dos dados |
 | `dados/csv/` | Tabelas em CSV para importar no painel |

@@ -1,160 +1,194 @@
--- Consultas analiticas. O numero segue o documento da entrega.
--- Taxas sobre matriculas com resultado (sem trancamentos), salvo indicacao.
+-- Consultas de apoio a decisao. A descricao completa de cada uma esta em docs/entrega_03_11.pdf.
+-- Ultimo semestre dos dados: 2025.2 (id_data = 20252). Numero do semestre: ano * 2 + semestre.
 USE dw_academico;
 
--- C1. Como a taxa de aprovacao evoluiu a cada semestre, por curso?
-SELECT d.ano_semestre, c.codigo_curso,
-       ROUND(100 * SUM(f.qtd_aprovacoes_nota + f.qtd_aprovacoes_final)
-             / SUM(f.qtd_matriculados - f.qtd_trancamentos), 1) AS taxa_aprovacao
-FROM fato_professor_disciplina f
-JOIN dim_data d ON d.id_data = f.id_data
-JOIN dim_curso c ON c.id_curso = f.id_curso
-GROUP BY d.ano_semestre, c.codigo_curso
-ORDER BY d.ano_semestre, c.codigo_curso;
+-- C1. Monitoria: em quais disciplinas o reforco atinge mais alunos?
+WITH agregada AS (
+  SELECT id_disciplina, SUM(qtd_matriculados) AS matriculas,
+         SUM(qtd_matriculados - qtd_trancamentos) AS com_resultado,
+         SUM(qtd_reprovacoes_nota) AS por_nota, SUM(qtd_reprovacoes_faltas) AS por_falta
+  FROM fato_professor_disciplina
+  WHERE id_data >= 20231
+  GROUP BY id_disciplina
+),
+repetentes AS (
+  SELECT id_disciplina, COUNT(*) AS matriculas_repetentes
+  FROM fato_professor_aluno
+  WHERE id_data >= 20231 AND qtd_tentativas >= 2
+  GROUP BY id_disciplina
+)
+SELECT d.nome_disciplina, a.matriculas, a.por_nota + a.por_falta AS reprovacoes,
+       ROUND(100 * (a.por_nota + a.por_falta) / a.com_resultado, 1) AS taxa_reprovacao,
+       ROUND(100 * a.por_falta / NULLIF(a.por_nota + a.por_falta, 0), 1) AS pct_reprovacoes_por_falta,
+       ROUND(100 * COALESCE(r.matriculas_repetentes, 0) / a.matriculas, 1) AS pct_matriculas_repetentes
+FROM agregada a
+JOIN dim_disciplina d ON d.id_disciplina = a.id_disciplina
+LEFT JOIN repetentes r ON r.id_disciplina = a.id_disciplina
+WHERE a.matriculas >= 100
+ORDER BY reprovacoes DESC;
 
--- C2. Quais disciplinas mais reprovam?
-SELECT di.nome_disciplina, SUM(f.qtd_matriculados) AS matriculados,
-       ROUND(100 * SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas)
-             / SUM(f.qtd_matriculados - f.qtd_trancamentos), 1) AS taxa_reprovacao
-FROM fato_professor_disciplina f
-JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
-GROUP BY di.nome_disciplina
-HAVING SUM(f.qtd_matriculados) >= 100
-ORDER BY taxa_reprovacao DESC
+-- C2. Oferta: quantas turmas extras cada disciplina precisa para absorver quem ficou para tras?
+WITH historico AS (
+  SELECT f.id_aluno, f.id_disciplina, f.id_curso,
+         MAX(f.situacao_final LIKE 'APROVADO%') AS ja_aprovado,
+         SUM(f.situacao_final LIKE 'REPROVADO%') AS reprovacoes
+  FROM fato_professor_aluno f
+  JOIN dim_aluno a ON a.id_aluno = f.id_aluno
+  WHERE a.situacao_vinculo = 'ATIVO'
+  GROUP BY f.id_aluno, f.id_disciplina, f.id_curso
+),
+pendentes AS (
+  SELECT h.id_disciplina,
+         COUNT(*) AS alunos_pendentes,
+         SUM(h.reprovacoes >= 2) AS pendentes_2_ou_mais_reprovacoes,
+         SUM(c.codigo_curso = 'CC') AS pendentes_cc,
+         SUM(c.codigo_curso = 'EC') AS pendentes_ec,
+         SUM(c.codigo_curso = 'SI') AS pendentes_si
+  FROM historico h
+  JOIN dim_curso c ON c.id_curso = h.id_curso
+  WHERE h.ja_aprovado = 0
+  GROUP BY h.id_disciplina
+),
+oferta AS (
+  SELECT id_disciplina, COUNT(DISTINCT id_turma_disciplina) AS turmas,
+         SUM(qtd_matriculados) / COUNT(DISTINCT id_turma_disciplina) AS alunos_por_turma
+  FROM fato_professor_disciplina
+  WHERE id_data IN (20251, 20252)
+  GROUP BY id_disciplina
+)
+SELECT d.nome_disciplina, p.alunos_pendentes, p.pendentes_cc, p.pendentes_ec, p.pendentes_si,
+       p.pendentes_2_ou_mais_reprovacoes, ROUND(o.alunos_por_turma, 1) AS alunos_por_turma,
+       ROUND(p.alunos_pendentes / o.alunos_por_turma, 1) AS turmas_equivalentes
+FROM pendentes p
+JOIN dim_disciplina d ON d.id_disciplina = p.id_disciplina
+LEFT JOIN oferta o ON o.id_disciplina = p.id_disciplina
+ORDER BY p.alunos_pendentes DESC
 LIMIT 10;
 
--- C3. Nas disciplinas criticas, como o resultado das matriculas se divide?
-SELECT di.nome_disciplina,
-       ROUND(100 * SUM(f.qtd_aprovacoes_nota) / SUM(f.qtd_matriculados), 1) AS aprovado_nota,
-       ROUND(100 * SUM(f.qtd_aprovacoes_final) / SUM(f.qtd_matriculados), 1) AS aprovado_final,
-       ROUND(100 * SUM(f.qtd_reprovacoes_nota) / SUM(f.qtd_matriculados), 1) AS reprovado_nota,
-       ROUND(100 * SUM(f.qtd_reprovacoes_faltas) / SUM(f.qtd_matriculados), 1) AS reprovado_faltas,
-       ROUND(100 * SUM(f.qtd_trancamentos) / SUM(f.qtd_matriculados), 1) AS trancado
-FROM fato_professor_disciplina f
-JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
-GROUP BY di.nome_disciplina
-HAVING SUM(f.qtd_matriculados) >= 100
-ORDER BY (SUM(f.qtd_reprovacoes_nota) + SUM(f.qtd_reprovacoes_faltas)) / SUM(f.qtd_matriculados) DESC
-LIMIT 8;
-
--- C4. Como as notas se distribuem nas faixas, por curso?
-SELECT c.codigo_curso,
-       SUM(f.qtd_nota_0_2_9) AS nota_0_a_2_9, SUM(f.qtd_nota_3_6_9) AS nota_3_a_6_9,
-       SUM(f.qtd_nota_7_7_9) AS nota_7_a_7_9, SUM(f.qtd_nota_8_8_9) AS nota_8_a_8_9,
-       SUM(f.qtd_nota_9_10) AS nota_9_a_10
-FROM fato_professor_disciplina f
-JOIN dim_curso c ON c.id_curso = f.id_curso
-GROUP BY c.codigo_curso
-ORDER BY c.codigo_curso;
-
--- C5. Em que semestres cada disciplina critica ficou pior?
-WITH criticas AS (
-  SELECT id_disciplina
-  FROM fato_professor_disciplina
-  GROUP BY id_disciplina
-  HAVING SUM(qtd_matriculados) >= 100
-  ORDER BY SUM(qtd_reprovacoes_nota + qtd_reprovacoes_faltas) / SUM(qtd_matriculados - qtd_trancamentos) DESC
-  LIMIT 8
+-- C3. Acompanhamento: a partir de quantas reprovacoes no primeiro ano vale acionar a tutoria?
+WITH primeiro_ano AS (
+  SELECT id_aluno, SUM(situacao_final LIKE 'REPROVADO%') AS reprovacoes
+  FROM fato_professor_aluno
+  WHERE periodo_aluno <= 2
+  GROUP BY id_aluno
+),
+base AS (
+  -- so entra quem chegou ao fim do 2o semestre sem evadir: e quando a decisao seria tomada
+  SELECT a.id_aluno, a.situacao_vinculo, t.id_curso
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  LEFT JOIN dim_data ds ON ds.id_data = a.id_data_saida
+  WHERE t.ano_ingresso * 2 + t.semestre_ingresso BETWEEN 2018 * 2 + 1 AND 2023 * 2 + 2
+    AND NOT (a.situacao_vinculo = 'EVADIDO'
+             AND ds.ano * 2 + ds.semestre - (t.ano_ingresso * 2 + t.semestre_ingresso) + 1 <= 2)
 )
-SELECT di.nome_disciplina, d.ano_semestre,
-       ROUND(100 * SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas)
-             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0), 1) AS taxa_reprovacao
-FROM fato_professor_disciplina f
-JOIN criticas x ON x.id_disciplina = f.id_disciplina
-JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
-JOIN dim_data d ON d.id_data = f.id_data
-GROUP BY di.nome_disciplina, d.ano_semestre
-ORDER BY di.nome_disciplina, d.ano_semestre;
+SELECT c.codigo_curso,
+       CASE WHEN p.reprovacoes >= 4 THEN '4 ou mais' ELSE CAST(p.reprovacoes AS CHAR) END AS reprovacoes_primeiro_ano,
+       COUNT(*) AS alunos,
+       SUM(b.situacao_vinculo = 'EVADIDO') AS evadiram_depois,
+       ROUND(100 * SUM(b.situacao_vinculo = 'EVADIDO') / COUNT(*), 1) AS taxa_evasao_posterior
+FROM base b
+JOIN primeiro_ano p ON p.id_aluno = b.id_aluno
+JOIN dim_curso c ON c.id_curso = b.id_curso
+GROUP BY c.codigo_curso, reprovacoes_primeiro_ano
+ORDER BY c.codigo_curso, reprovacoes_primeiro_ano;
 
--- C6. Ofertas com mais faltas reprovam mais?
-SELECT t.id_turma_disciplina, di.nome_disciplina, d.ano_semestre,
-       ROUND(SUM(f.soma_faltas) / NULLIF(SUM(f.qtd_faltas_validas), 0), 2) AS media_faltas,
-       ROUND(100 * SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas)
-             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0), 1) AS taxa_reprovacao,
-       SUM(f.qtd_matriculados) AS matriculados
-FROM fato_professor_disciplina f
-JOIN dim_turma_disciplina t ON t.id_turma_disciplina = f.id_turma_disciplina
-JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
-JOIN dim_data d ON d.id_data = f.id_data
-GROUP BY t.id_turma_disciplina, di.nome_disciplina, d.ano_semestre
-HAVING SUM(f.qtd_matriculados) >= 10;
+-- C4. Prevencao: ate que semestre do curso a evasao se acumula, e quando ela perde forca?
+WITH RECURSIVE semestres (n) AS (
+  SELECT 1 UNION ALL SELECT n + 1 FROM semestres WHERE n < 12
+),
+base AS (
+  -- so turmas com 12 semestres de historico, para todos os pontos terem os mesmos alunos
+  SELECT c.codigo_curso,
+         CASE WHEN a.situacao_vinculo = 'EVADIDO'
+              THEN ds.ano * 2 + ds.semestre - (t.ano_ingresso * 2 + t.semestre_ingresso) + 1 END AS semestre_evasao
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  JOIN dim_curso c ON c.id_curso = t.id_curso
+  LEFT JOIN dim_data ds ON ds.id_data = a.id_data_saida
+  WHERE t.ano_ingresso * 2 + t.semestre_ingresso BETWEEN 2018 * 2 + 1 AND 2020 * 2 + 1
+)
+SELECT b.codigo_curso, s.n AS semestre_do_curso, COUNT(*) AS ingressantes,
+       SUM(COALESCE(b.semestre_evasao <= s.n, 0)) AS evadidos_acumulados,
+       ROUND(100 * SUM(COALESCE(b.semestre_evasao <= s.n, 0)) / COUNT(*), 1) AS evasao_acumulada
+FROM base b
+CROSS JOIN semestres s
+GROUP BY b.codigo_curso, s.n
+ORDER BY b.codigo_curso, s.n;
 
--- C7. Dentro de uma mesma disciplina, como variam os resultados por professor?
-SELECT di.nome_disciplina, p.nome_professor, COUNT(DISTINCT f.id_turma_disciplina) AS turmas,
-       SUM(f.qtd_matriculados) AS matriculados,
-       ROUND(SUM(f.soma_notas_finais) / NULLIF(SUM(f.qtd_notas_validas), 0), 2) AS media_notas,
-       ROUND(100 * SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas)
-             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0), 1) AS taxa_reprovacao
-FROM fato_professor_disciplina f
-JOIN vw_turma_professor tp ON tp.id_turma_disciplina = f.id_turma_disciplina
-JOIN dim_professor p ON p.id_professor = tp.id_professor
-JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
-GROUP BY di.nome_disciplina, p.nome_professor
-ORDER BY di.nome_disciplina, taxa_reprovacao DESC;
+-- C5. Integralizacao: quantos alunos ativos ja passaram do prazo em cada curso, e por quanto?
+WITH ativos AS (
+  SELECT a.id_aluno, c.codigo_curso,
+         (2025 * 2 + 2) - (t.ano_ingresso * 2 + t.semestre_ingresso) + 1 - c.semestres_previstos AS atraso
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  JOIN dim_curso c ON c.id_curso = t.id_curso
+  WHERE a.situacao_vinculo = 'ATIVO'
+),
+carga AS (
+  SELECT id_aluno, SUM(ch_adquirida) AS ch
+  FROM fato_professor_aluno
+  GROUP BY id_aluno
+)
+SELECT x.codigo_curso,
+       CASE WHEN x.atraso <= 0 THEN '0. No prazo'
+            WHEN x.atraso <= 2 THEN '1. Ate 2 semestres de atraso'
+            WHEN x.atraso <= 4 THEN '2. De 3 a 4 semestres de atraso'
+            ELSE '3. 5 semestres de atraso ou mais' END AS situacao_prazo,
+       COUNT(*) AS alunos_ativos,
+       ROUND(AVG(k.ch)) AS carga_horaria_media_cursada
+FROM ativos x
+JOIN carga k ON k.id_aluno = x.id_aluno
+GROUP BY x.codigo_curso, situacao_prazo
+ORDER BY x.codigo_curso, situacao_prazo;
 
--- C8. Em qual periodo do aluno as reprovacoes se concentram?
-SELECT f.periodo_aluno, COUNT(*) AS matriculas,
-       ROUND(100 * SUM(f.situacao_final LIKE 'REPROVADO%')
-             / SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA'), 1) AS taxa_reprovacao
-FROM fato_professor_aluno f
-WHERE f.periodo_aluno <= 12
-GROUP BY f.periodo_aluno
-ORDER BY f.periodo_aluno;
+-- C6. Assistencia estudantil: em quais faixas economicas o beneficio deve ser priorizado?
+WITH evasao AS (
+  SELECT a.faixa_economica, COUNT(*) AS alunos,
+         ROUND(100 * SUM(a.situacao_vinculo = 'EVADIDO') / COUNT(*), 1) AS taxa_evasao
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  WHERE t.ano_ingresso * 2 + t.semestre_ingresso BETWEEN 2018 * 2 + 1 AND 2023 * 2 + 2
+  GROUP BY a.faixa_economica
+),
+desempenho AS (
+  SELECT a.faixa_economica,
+         ROUND(100 * AVG(f.bolsista_no_semestre), 1) AS cobertura_beneficio,
+         ROUND(100 * SUM(f.bolsista_no_semestre AND f.situacao_final LIKE 'APROVADO%')
+               / NULLIF(SUM(f.bolsista_no_semestre AND f.situacao_final <> 'TRANCADO_DISCIPLINA'), 0), 1) AS aprovacao_com_beneficio,
+         ROUND(100 * SUM(NOT f.bolsista_no_semestre AND f.situacao_final LIKE 'APROVADO%')
+               / NULLIF(SUM(NOT f.bolsista_no_semestre AND f.situacao_final <> 'TRANCADO_DISCIPLINA'), 0), 1) AS aprovacao_sem_beneficio
+  FROM fato_professor_aluno f
+  JOIN dim_aluno a ON a.id_aluno = f.id_aluno
+  WHERE f.periodo_aluno >= 2
+  GROUP BY a.faixa_economica
+)
+SELECT e.faixa_economica, e.alunos, e.taxa_evasao, d.cobertura_beneficio,
+       d.aprovacao_com_beneficio, d.aprovacao_sem_beneficio
+FROM evasao e
+JOIN desempenho d ON d.faixa_economica = e.faixa_economica
+ORDER BY FIELD(e.faixa_economica, 'Ate 1,5 SM', '1,5 a 3 SM', '3 a 5 SM', 'Acima de 5 SM');
 
--- C9. O que aconteceu com cada coorte de ingresso?
-SELECT t.ano_semestre_ingresso, COUNT(*) AS ingressantes,
-       ROUND(100 * SUM(a.situacao_vinculo = 'CONCLUIDO') / COUNT(*), 1) AS concluiu,
-       ROUND(100 * SUM(a.situacao_vinculo = 'ATIVO') / COUNT(*), 1) AS ativo,
-       ROUND(100 * SUM(a.situacao_vinculo = 'EVADIDO') / COUNT(*), 1) AS evadiu
-FROM dim_aluno a
-JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
-WHERE t.ano_ingresso >= 2018 -- coortes anteriores so tem os sobreviventes de 2018
-GROUP BY t.ano_semestre_ingresso
-ORDER BY t.ano_semestre_ingresso;
-
--- C10. Desempenho e evasao mudam com o tipo de cota e a faixa economica?
-SELECT COALESCE(a.tipo_cota, 'Sem cota (outras formas)') AS tipo_cota, a.faixa_economica,
-       COUNT(DISTINCT a.id_aluno) AS alunos,
-       ROUND(100 * SUM(f.situacao_final LIKE 'REPROVADO%')
-             / SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA'), 1) AS taxa_reprovacao,
-       ROUND(100 * COUNT(DISTINCT CASE WHEN a.situacao_vinculo = 'EVADIDO' THEN a.id_aluno END)
-             / COUNT(DISTINCT a.id_aluno), 1) AS taxa_evasao
-FROM fato_professor_aluno f
-JOIN dim_aluno a ON a.id_aluno = f.id_aluno
-GROUP BY tipo_cota, a.faixa_economica
-ORDER BY tipo_cota, a.faixa_economica;
-
--- C11. O tempo de conclusao supera o previsto em cada curso?
-SELECT c.codigo_curso, c.semestres_previstos, COUNT(*) AS concluintes,
-       ROUND(AVG((ds.ano * 2 + ds.semestre) - (t.ano_ingresso * 2 + t.semestre_ingresso) + 1), 1) AS media_semestres
-FROM dim_aluno a
-JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
-JOIN dim_curso c ON c.id_curso = t.id_curso
-JOIN dim_data ds ON ds.id_data = a.id_data_saida
-WHERE a.situacao_vinculo = 'CONCLUIDO'
-GROUP BY c.codigo_curso, c.semestres_previstos
-ORDER BY c.codigo_curso;
-
--- C12. A chance de aprovacao muda a cada nova tentativa?
-SELECT CASE WHEN f.qtd_tentativas >= 3 THEN '3 ou mais' ELSE CAST(f.qtd_tentativas AS CHAR) END AS tentativa,
-       COUNT(*) AS matriculas,
-       ROUND(100 * SUM(f.situacao_final LIKE 'APROVADO%')
-             / SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA'), 1) AS taxa_aprovacao
-FROM fato_professor_aluno f
-GROUP BY tentativa
-ORDER BY tentativa;
-
--- C13. Bolsistas aprovam mais do que nao bolsistas ao longo do tempo?
-SELECT d.ano_semestre,
-       ROUND(100 * SUM(f.qtd_bolsistas_aprovados_nota + f.qtd_bolsistas_aprovados_final)
-             / NULLIF(SUM(f.qtd_bolsistas_aprovados_nota + f.qtd_bolsistas_aprovados_final
-                          + f.qtd_bolsistas_reprovados_nota + f.qtd_bolsistas_reprovados_faltas), 0), 1) AS bolsistas,
-       ROUND(100 * SUM(f.qtd_aprovacoes_nota + f.qtd_aprovacoes_final
-                       - f.qtd_bolsistas_aprovados_nota - f.qtd_bolsistas_aprovados_final)
-             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos
-                          - f.qtd_bolsistas_aprovados_nota - f.qtd_bolsistas_aprovados_final
-                          - f.qtd_bolsistas_reprovados_nota - f.qtd_bolsistas_reprovados_faltas), 0), 1) AS nao_bolsistas
-FROM fato_professor_disciplina f
-JOIN dim_data d ON d.id_data = f.id_data
-GROUP BY d.ano_semestre
-ORDER BY d.ano_semestre;
+-- C7. Coordenacao pedagogica: em quais disciplinas vale alinhar criterios entre professores?
+WITH por_professor AS (
+  SELECT f.id_disciplina, tp.id_professor, SUM(f.qtd_matriculados) AS matriculas,
+         SUM(f.qtd_matriculados - f.qtd_trancamentos) AS com_resultado,
+         SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas) AS reprovacoes,
+         100 * SUM(f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas)
+             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0) AS taxa
+  FROM fato_professor_disciplina f
+  JOIN vw_turma_professor tp ON tp.id_turma_disciplina = f.id_turma_disciplina
+  WHERE f.id_data >= 20231
+  GROUP BY f.id_disciplina, tp.id_professor
+  HAVING SUM(f.qtd_matriculados) >= 30
+)
+SELECT d.nome_disciplina, COUNT(*) AS professores,
+       ROUND(MIN(p.taxa), 1) AS menor_taxa_reprovacao,
+       ROUND(MAX(p.taxa), 1) AS maior_taxa_reprovacao,
+       ROUND(MAX(p.taxa) - MIN(p.taxa), 1) AS diferenca_pontos
+FROM por_professor p
+JOIN dim_disciplina d ON d.id_disciplina = p.id_disciplina
+GROUP BY d.nome_disciplina
+HAVING COUNT(*) >= 2
+ORDER BY diferenca_pontos DESC
+LIMIT 10;

@@ -21,40 +21,42 @@ cabecalho = ParagraphStyle("cabecalho", parent=celula, fontName="Helvetica-Bold"
 codigo = ParagraphStyle("codigo", parent=corpo, fontName="Courier", fontSize=8.5, leading=12, spaceAfter=0)
 
 CONSULTAS = [
-    ("C1. Como a taxa de aprovação de cada disciplina evoluiu ao longo dos 16 semestres?", "Agregada", "Linhas, uma por disciplina, com filtro de disciplina",
-     "O tempo é contínuo e ordenado, e a linha mostra tendência e mudança de patamar. Em colunas, 16 semestres vezes 42 disciplinas dariam 672 barras. Mesmo em linhas, 42 juntas ficariam ilegíveis, então o filtro deixa comparar poucas disciplinas por vez."),
-    ("C2. Quais são as 10 disciplinas com maior taxa de reprovação, e qual é a taxa de cada uma?", "Agregada", "Barras horizontais ordenadas (10 maiores)",
-     "Compara valores entre categorias sem ordem própria. Os nomes longos cabem na horizontal e a ordenação já entrega o ranking. Pizza não serve, porque as taxas não somam 100%."),
-    ("C3. Nas disciplinas críticas, como as matrículas se dividem entre aprovação por nota, aprovação na final, reprovação por nota, reprovação por falta e trancamento?", "Agregada", "Barras empilhadas em 100%",
-     "Cada barra é um todo dividido em partes, e várias pizzas seriam difíceis de comparar. Separar reprovação por nota e por falta importa, porque a primeira aponta dificuldade de conteúdo e a segunda, abandono da disciplina."),
-    ("C4. Como as notas finais de cada curso se distribuem entre as faixas da regra de avaliação?", "Agregada", "Colunas por faixa, em % do curso",
-     "As faixas têm ordem, então colunas lado a lado funcionam, e o percentual evita que o curso maior pareça pior. Não é um histograma: as faixas seguem a regra da disciplina, e não uma largura fixa. A de 0 a 2,9 é de quem não chega à final, e a de 3 a 6,9 concentra quem vai para ela. Essa faixa tem 4 pontos e a de 7 a 7,9 tem 1, então parte da altura vem da largura. Vale deixar isso escrito no painel."),
-    ("C5. Como a taxa de reprovação de cada disciplina crítica variou de um semestre para outro, e como essa variação acompanha o professor que deu a disciplina?", "Agregada + ponte", "Mapa de calor (disciplina x semestre), com o professor na dica",
-     "São duas dimensões e 128 valores. A cor em um só tom destaca os pontos fora do padrão, enquanto 8 linhas sobrepostas ficariam ilegíveis. A dica de cada célula mostra quem deu a disciplina naquele semestre, para ver se as piores células coincidem com a troca de professor. Uma célula pode ter mais de uma turma e mais de um professor, e a coincidência não prova que o professor causou a variação."),
-    ("C6. Como a taxa de reprovação de cada oferta se relaciona com a média de faltas dessa oferta?", "Agregada", "Dispersão, um ponto por oferta",
-     "É a relação entre duas medidas numéricas, e cada ponto mantém a oferta visível. Usamos a média de faltas, e não a soma, porque a soma cresce com o tamanho da turma. O gráfico mostra associação, não causa."),
-    ("C7. Dentro de uma mesma disciplina, como a taxa de aprovação, a nota média e o número de alunos variam entre os professores?", "Agregada + ponte", "Tabela com barra de dados, filtrada por disciplina",
-     "Aqui o valor exato e o número de alunos importam. O filtro compara professores só dentro da mesma disciplina, porque um ranking geral puniria quem ensina as matérias difíceis."),
-    ("C8. Como as reprovações se distribuem conforme o período em que os alunos estão no curso?", "Por aluno", "Colunas por período",
-     "Os períodos são discretos e ordenados, e a coluna deixa claro onde está o pico. A base é maior nos primeiros períodos, então convém mostrar o total de matrículas na dica do gráfico."),
-    ("C9. Em cada turma de ingresso, qual é a proporção de alunos que concluíram, que seguem ativos e que evadiram?", "Por aluno", "Barras empilhadas em 100% (concluiu, ativo, evadiu)",
-     "Toda turma de ingresso soma 100%. A parte de ativos evita uma leitura errada: as turmas que entraram há pouco concluíram pouco porque ainda estão no curso, e a evasão delas ainda pode subir."),
-    ("C10. Como as taxas de reprovação e de evasão variam entre os tipos de cota em cada faixa econômica?", "Por aluno", "Dois gráficos de barras horizontais, com filtro de faixa",
-     "Reprovação e evasão ficam em gráficos separados, sem eixo duplo, que sugeriria relações que dependem só da escala. O número de alunos aparece junto, porque alguns grupos são pequenos e oscilam muito."),
-    ("C11. Quanto o tempo de conclusão de cada curso se afasta do prazo previsto?", "Por aluno", "Barras com marcador do prazo previsto",
-     "O marcador compara cada curso com a própria meta, já que os prazos são diferentes. Sem ferramenta para isso, colunas agrupadas (previsto e real) cumprem o papel. A base são só os alunos que concluíram."),
-    ("C12. Como a taxa de aprovação muda da 1ª para a 2ª tentativa, e para a 3ª ou mais, na mesma disciplina?", "Por aluno", "Colunas (1ª, 2ª, 3ª ou mais)",
-     "São só três categorias ordenadas e uma medida, então o gráfico mais simples basta."),
-    ("C13. Como a taxa de aprovação de beneficiários e de não beneficiários de assistência estudantil evoluiu ao longo dos semestres?", "Agregada", "Duas linhas",
-     "Pelo mesmo motivo de C1, e a distância entre as linhas é a informação. Atenção: no gerador só há benefício a partir do 2º período, então o grupo sem benefício inclui calouros e a diferença não prova efeito da assistência estudantil."),
+    ("C1. Considerando as matrículas de 2023.1 a 2025.2, para cada disciplina com pelo menos 100 matrículas, quantas reprovações houve, qual foi a taxa de reprovação, que parte dessas reprovações foi por falta e que parte das matrículas era de alunos repetindo a disciplina?",
+     "A coordenação decide onde colocar as vagas de monitoria. O número de reprovações mostra quantos alunos a monitoria pode atingir, e a taxa mostra a gravidade. Quando a maior parte é por falta, reforço de conteúdo pode não bastar.",
+     "Agregada e por aluno", "Dispersão de matrículas por taxa de reprovação, com linhas nas medianas",
+     "Duas medidas precisam ser lidas juntas: um ranking só pela taxa destacaria disciplinas pequenas, e só por volume, as grandes. O quadrante de muitas matrículas e taxa alta é a prioridade."),
+    ("C2. Considerando os alunos ativos ao fim de 2025.2, para cada disciplina, quantos já a cursaram sem aprovação e ainda a devem, separados por curso, quantos deles já reprovaram duas vezes ou mais, e a quantas turmas esse total equivale, usando a média de alunos por turma de 2025.1 e 2025.2? Mostrar as 10 disciplinas com mais pendentes.",
+     "O departamento decide em quais disciplinas abrir ou ampliar turmas no próximo semestre. Esses alunos se somam à demanda regular de quem ainda vai cursar pela primeira vez, que fica fora desta conta.",
+     "Por aluno e agregada", "Barras horizontais empilhadas por curso",
+     "O comprimento mostra o total a absorver, e os segmentos mostram quais cursos pressionam a oferta. As turmas equivalentes entram como rótulo no fim de cada barra."),
+    ("C3. Entre os alunos que ingressaram de 2018.1 a 2023.2 e chegaram ao fim do 2º semestre sem evadir, separados por curso e pelo número de reprovações nesses dois semestres (0, 1, 2, 3, 4 ou mais), que parte evadiu depois?",
+     "A coordenação define o critério de entrada na tutoria: a partir de quantas reprovações o aluno é chamado. Só entra quem ainda estava no curso ao fim do 1º ano, porque é nesse momento que a decisão seria tomada.",
+     "Por aluno", "Colunas por número de reprovações, um painel por curso",
+     "As categorias são ordenadas e o que importa é onde a evasão salta. Painéis separados evitam misturar 15 colunas. O número de alunos aparece em cada coluna, porque alguns grupos são pequenos."),
+    ("C4. Entre os alunos que ingressaram de 2018.1 a 2020.1, que já têm 12 semestres de histórico, que parte de cada curso já tinha evadido até cada semestre, do 1º ao 12º?",
+     "A coordenação decide em que momento do curso concentrar as ações de permanência: onde a curva sobe mais rápido, a ação tende a chegar a tempo de mais alunos.",
+     "Por aluno", "Linhas acumuladas, uma por curso",
+     "O eixo é uma sequência de tempo, e a inclinação da linha mostra quando a evasão acontece. Usar sempre as mesmas turmas impede que a curva mude só porque os alunos observados mudaram."),
+    ("C5. Ao fim de 2025.2, comparando o tempo de curso com o prazo previsto, quantos alunos ativos de cada curso estão no prazo, com até 2 semestres de atraso, com 3 a 4 e com 5 ou mais, e qual é a carga horária média já cursada em cada grupo?",
+     "A coordenação dimensiona o plano de integralização: quantos alunos atender e por onde começar. Muito atraso com carga horária alta sugere um aluno perto de concluir.",
+     "Por aluno", "Barras horizontais empilhadas por curso, com a carga horária em tabela",
+     "Os grupos de atraso são partes ordenadas do total de ativos de cada curso. A carga horária é outra medida, então fica na tabela, sem eixo duplo."),
+    ("C6. Para cada faixa econômica, considerando os ingressantes de 2018.1 a 2023.2, que parte evadiu? E, nas matrículas a partir do 2º período, que parte tinha assistência estudantil, e qual foi a taxa de aprovação com e sem o benefício?",
+     "A gestão da assistência estudantil decide para quais faixas direcionar o benefício. Evasão alta com pouca cobertura aponta onde ampliar. A comparação começa no 2º período porque, nos dados sintéticos, calouros não recebem o benefício.",
+     "Por aluno", "Colunas agrupadas (com e sem benefício) por faixa, com evasão e cobertura em tabela",
+     "As faixas são ordenadas, e a distância entre as colunas é a informação. Evasão e cobertura ficam na tabela para evitar um segundo eixo. O resultado mostra associação: não prova efeito do benefício."),
+    ("C7. Considerando de 2023.1 a 2025.2 e só professores com pelo menos 30 matrículas na disciplina, para cada disciplina com dois professores ou mais, quais são a menor e a maior taxa de reprovação entre eles, e qual é a diferença em pontos percentuais? Mostrar as 10 maiores diferenças.",
+     "A coordenação pedagógica decide em quais disciplinas reunir os professores para alinhar plano de ensino e critérios de avaliação. A consulta aponta disciplinas, não serve para avaliar professores, e não mede as diferenças entre as turmas de cada um.",
+     "Agregada e view de professores", "Intervalo (menor e maior taxa ligadas por um segmento), por disciplina",
+     "O segmento mostra ao mesmo tempo o nível da disciplina e a distância entre os extremos, o que uma barra só com a diferença esconderia. Turmas com mais de um professor contam para todos eles."),
 ]
 
 AJUSTES = [
-    ("<b>situacao_vinculo</b> e <b>id_data_saida</b> em dim_aluno", "O esquema registrava matrículas, mas não dizia quem concluiu ou evadiu, nem quando.", "C9, C10, C11"),
-    ("<b>semestres_previstos</b> em dim_curso", "Sem o prazo de cada curso, não há com o que comparar o tempo de conclusão.", "C11"),
-    ("<b>periodo_aluno</b> em fato_professor_aluno", "Guarda quantos semestres se passaram desde o ingresso. Calculado na carga, dispensa uma tabela de matriz curricular por curso.", "C8"),
-    ("<b>qtd_trancamentos</b> em fato_professor_disciplina", "As quatro contagens de situação não fechavam com qtd_matriculados quando havia trancamento, e as taxas ficavam com a base errada.", "C1, C2, C3, C5, C6, C7, C13"),
-    ("View <b>vw_turma_professor</b>", "Transforma os três papéis de professor em linhas, sem alterar as tabelas. Evita três joins em cada consulta. O peso reparte turmas com mais de um professor em somas gerais.", "C5, C7"),
+    ("<b>situacao_vinculo</b> e <b>id_data_saida</b> em dim_aluno", "O esquema registrava matrículas, mas não dizia quem concluiu ou evadiu, nem quando.", "C2, C3, C4, C5, C6"),
+    ("<b>semestres_previstos</b> em dim_curso", "Sem o prazo de cada curso, não há como saber quem está atrasado.", "C5"),
+    ("<b>periodo_aluno</b> em fato_professor_aluno", "Guarda quantos semestres se passaram desde o ingresso. Calculado na carga, dispensa uma tabela de matriz curricular por curso.", "C3, C6"),
+    ("<b>qtd_trancamentos</b> em fato_professor_disciplina", "As quatro contagens de situação não fechavam com qtd_matriculados quando havia trancamento, e as taxas ficavam com a base errada.", "C1, C7"),
+    ("View <b>vw_turma_professor</b>", "Transforma os três papéis de professor em linhas, sem alterar as tabelas. Evita três joins em cada consulta. O peso reparte turmas com mais de um professor em somas gerais.", "C7"),
 ]
 
 VOLUMES = [
@@ -90,29 +92,27 @@ def rodape(canvas, doc):
 def main():
     h = []
     h.append(Paragraph("Construção dos esquemas", titulo))
-    h.append(Paragraph("Data Warehouse, UFPE. Entrega da aula de 03/11/2026, sobre os esquemas PDFs e PDFs 2.<br/>Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb.", sub))
+    h.append(Paragraph("Data Warehouse, UFPE. Entrega da aula de 03/11/2026, revisada depois do retorno do professor.<br/>Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb.", sub))
     h.append(Paragraph(
-        "Levantamos 13 consultas sobre as duas estrelas, escolhemos o gráfico de cada uma, ajustamos o que faltava nos "
-        "esquemas e povoamos tudo com dados sintéticos. Os scripts rodaram no MySQL 8, o banco definido nos diagramas, "
-        "e as 13 consultas executaram sem erro. Partimos das questões do TCC de Espíndola (UFPE, 2025) e as adaptamos "
-        "aos campos que temos, como turma, professor, assistência estudantil e faixa econômica.", corpo))
+        "Reduzimos as consultas de 13 para 7, cada uma ligada a uma decisão de gestão acadêmica e descrita com população, "
+        "período, medidas e agrupamentos. Escolhemos o gráfico de cada uma, ajustamos o que faltava nos esquemas e povoamos "
+        "tudo com dados sintéticos. Os scripts rodaram no MySQL 8, o banco definido nos diagramas, e as 7 consultas "
+        "executaram sem erro. Partimos das questões do TCC de Espíndola (UFPE, 2025) e as adaptamos aos campos que temos.", corpo))
 
     h.append(Paragraph("1. Consultas e escolha dos gráficos", secao))
     h.append(Paragraph(
-        "\"Agregada\" é a estrela de fato_professor_disciplina, e \"Por aluno\" é a de fato_professor_aluno. "
+        "\"Agregada\" é a estrela de fato_professor_disciplina, e \"por aluno\" é a de fato_professor_aluno. "
         "O SQL de cada consulta está em sql/05_consultas.sql.", corpo))
-    for perg, estrela, grafico, porque in CONSULTAS:
+    for perg, decisao, estrela, grafico, porque in CONSULTAS:
         h.append(KeepTogether([
-            Paragraph(perg, pergunta),
-            Paragraph(f"Estrela: {estrela}. Gráfico: {grafico}.", corpo.clone("meta", spaceAfter=2)),
-            Paragraph(porque, corpo.clone("porque", spaceAfter=9)),
+            Paragraph(perg, pergunta.clone("pergunta_consulta", spaceAfter=3)),
+            Paragraph(f"<b>Decisão:</b> {decisao}", corpo.clone("decisao", spaceAfter=3)),
+            Paragraph(f"<b>Estrela:</b> {estrela}. <b>Gráfico:</b> {grafico}. {porque}", corpo.clone("porque", spaceAfter=10)),
         ]))
     h.append(Paragraph(
-        "Três regras valem para todo o painel. As taxas devem ser calculadas a partir das contagens, nunca como média de "
-        "taxas de turmas, porque turmas pequenas pesariam igual às grandes. A média de notas agregada é "
-        "soma_notas_finais / qtd_notas_validas, e a mediana não se agrega, como o próprio diagrama já avisa. "
-        "Por fim, os indicadores gerais (taxa de aprovação, nota média, evasão) ficam em cartões no topo, porque são um "
-        "número só e pedem leitura imediata.", corpo))
+        "Duas regras valem para todas as consultas. As taxas são calculadas a partir das contagens, nunca como média de "
+        "taxas de turmas, porque turmas pequenas pesariam igual às grandes. E a evasão de turmas recentes ainda pode "
+        "subir, por isso C3, C4 e C6 limitam o período de ingresso.", corpo))
 
     h.append(KeepTogether([
         Paragraph("2. Ajustes nos esquemas", secao),
@@ -122,7 +122,7 @@ def main():
     h.append(Spacer(1, 8))
     h.append(Paragraph(
         "<b>Pendências do grupo.</b> Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de "
-        "origem. Se não estiverem, C9, C10 e C11 perdem a base com os dados reais. Sexo e faixa etária, usados no TCC, não "
+        "origem. Isso pesa em 5 das 7 consultas: C2, C3, C4, C5 e C6 dependem da situação, e C3 e C4 também do semestre de saída. Só C1 e C7 funcionam sem esses campos. Sexo e faixa etária, usados no TCC, não "
         "foram incluídos porque não sabemos se a fonte traz esses dados. Os ajustes nos diagramas do DrawSQL estão listados "
         "em docs/mudancas_esquemas.md, e o arquivo sql/01_ddl.sql já tem a versão final.", corpo))
 
@@ -143,7 +143,7 @@ def main():
         "<b>O que estes dados não são.</b> Nenhum número aqui descreve a UFPE. Colocamos de propósito alguns efeitos para o "
         "painel ter o que mostrar: disciplinas com dificuldades diferentes, primeiros períodos mais duros, notas maiores "
         "em 2020 e 2021 e uma pequena vantagem nas faixas de renda mais altas. O tipo de cota não tem efeito direto no "
-        "gerador. Qualquer padrão nos gráficos reflete essas escolhas, não uma descoberta. Alunos e professores são "
+        "gerador. O risco de evasão no gerador cresce com as reprovações, o que alimenta C3. O benefício e o professor não têm efeito no gerador, então as diferenças em C6 e C7 são acaso. Qualquer padrão nos resultados reflete essas escolhas, não uma descoberta. Alunos e professores são "
         "pseudônimos, e os anos de 2014 a 2017 foram simulados só para 2018 não começar apenas com calouros.", corpo))
     h.append(Paragraph(
         "<b>Verificação.</b> Os 15 testes de sql/06_validacao.sql retornaram zero erros. Eles conferem, entre outras coisas, "
