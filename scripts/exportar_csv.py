@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-TABELAS = ["dim_data", "dim_curso", "dim_disciplina", "dim_professor", "dim_turma_aluno", "dim_aluno",
+TABELAS = ["dim_data", "dim_curso", "dim_disciplina", "curso_disciplina", "dim_professor", "dim_turma_aluno", "dim_aluno",
            "dim_turma_disciplina", "fato_professor_aluno", "fato_professor_disciplina", "vw_turma_professor"]
 destino = Path(__file__).resolve().parent.parent / "dados" / "csv"
 destino.mkdir(parents=True, exist_ok=True)

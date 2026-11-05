@@ -30,6 +30,14 @@ Table dim_disciplina {
   creditos int
 }
 
+Table curso_disciplina {
+  id_curso bigint [pk, ref: > dim_curso.id_curso]
+  id_disciplina bigint [pk, ref: > dim_disciplina.id_disciplina]
+  periodo_curricular smallint [not null, note: '[AJUSTE] Periodo da disciplina na matriz de cada curso']
+
+  Note: '[AJUSTE] Uma disciplina pode estar em periodos diferentes em cada curso.'
+}
+
 Table dim_professor {
   id_professor bigint [pk]
   matricula_professor varchar(30)
@@ -144,6 +152,7 @@ TableGroup dimensoes_compartilhadas {
   dim_data
   dim_curso
   dim_disciplina
+  curso_disciplina
   dim_professor
   dim_turma_disciplina
 }

@@ -244,6 +244,8 @@ def main():
         inserts(f, "dim_disciplina", ["id_disciplina", "codigo_disciplina", "nome_disciplina", "carga_horaria",
                                       "creditos"],
                 [(d["id"], d["codigo"], d["nome"], d["ch"], d["creditos"]) for d in disciplinas.values()])
+        inserts(f, "curso_disciplina", ["id_curso", "id_disciplina", "periodo_curricular"],
+                [(c[0], disciplinas[d[0]]["id"], d[3 + c[0]]) for c in CURSOS for d in CURRICULO if d[3 + c[0]] > 0])
         inserts(f, "dim_professor", ["id_professor", "matricula_professor", "nome_professor"],
                 [(p["id"], p["matricula"], p["nome"]) for p in professores])
         inserts(f, "dim_turma_aluno", ["id_turma_aluno", "id_curso", "ano_ingresso", "semestre_ingresso",

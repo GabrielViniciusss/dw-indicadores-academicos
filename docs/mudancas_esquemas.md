@@ -8,12 +8,13 @@ Os diagramas ainda não foram alterados. Eles precisam receber os acréscimos ab
 
 | # | Onde | Mudança | Diagrama | Consultas |
 | --- | --- | --- | --- | --- |
-| 1 | `dim_curso` | Nova coluna `semestres_previstos` | PDFs e PDFs 2 | C5 |
-| 2 | `dim_aluno` | Nova coluna `situacao_vinculo` | PDFs | C2, C3, C4, C5, C6 |
-| 3 | `dim_aluno` | Nova coluna `id_data_saida`, com relação para `dim_data` | PDFs | C3, C4 |
-| 4 | `fato_professor_aluno` | Nova coluna `periodo_aluno` | PDFs | C3, C6 |
-| 5 | `fato_professor_disciplina` | Nova coluna `qtd_trancamentos` | PDFs 2 | C1, C7 |
-| 6 | Banco | Nova view `vw_turma_professor` | Só no SQL | C7 |
+| 1 | `dim_curso` | Nova coluna `semestres_previstos` | PDFs e PDFs 2 | C11 |
+| 2 | `dim_aluno` | Nova coluna `situacao_vinculo` | PDFs | C9, C10, C11, C13 |
+| 3 | `dim_aluno` | Nova coluna `id_data_saida`, com relação para `dim_data` | PDFs | C11, C13 |
+| 4 | `fato_professor_aluno` | Nova coluna `periodo_aluno` | PDFs | C8 |
+| 5 | `fato_professor_disciplina` | Nova coluna `qtd_trancamentos` | PDFs 2 | C1, C2, C3, C4, C5, C6, C7 |
+| 6 | Banco | Nova tabela `curso_disciplina` | PDFs 2 | C5 |
+| 7 | Banco | Nova view `vw_turma_professor` | Só no SQL | C4, C7 |
 
 Nenhuma tabela ou coluna foi removida ou renomeada. Os grãos, as chaves primárias, os índices únicos e as relações que já existiam continuam iguais.
 
@@ -27,6 +28,14 @@ Nenhuma tabela ou coluna foi removida ou renomeada. Os grãos, as chaves primár
 | `fato_professor_aluno` | `periodo_aluno` | `smallint` | Não | Depois de `qtd_tentativas` | Semestres desde o ingresso; o primeiro semestre é 1 |
 | `fato_professor_disciplina` | `qtd_trancamentos` | `int` | Não | Depois de `qtd_reprovacoes_faltas` | Fecha a conta de `qtd_matriculados` |
 
+No diagrama PDFs 2, crie também a tabela `curso_disciplina`:
+
+| Coluna | Tipo | Nulo | Observação |
+| --- | --- | --- | --- |
+| `id_curso` | `bigint` | Não | Chave primária, com relação para `dim_curso.id_curso` |
+| `id_disciplina` | `bigint` | Não | Chave primária, com relação para `dim_disciplina.id_disciplina` |
+| `periodo_curricular` | `smallint` | Não | Período da disciplina na matriz daquele curso |
+
 No diagrama PDFs, crie também a relação `dim_aluno.id_data_saida` para `dim_data.id_data` (muitos para um).
 
 `dim_curso` existe nos dois diagramas e é uma dimensão compartilhada. Por isso, a coluna entra nos dois.
@@ -37,6 +46,7 @@ No diagrama PDFs, crie também a relação `dim_aluno.id_data_saida` para `dim_d
 - **`situacao_vinculo` e `id_data_saida`:** o esquema registrava as matrículas, mas não dizia quem concluiu ou evadiu, nem quando. A evasão não pode ser deduzida só pela falta de matrícula, porque o aluno pode estar apenas sem cursar nada naquele semestre.
 - **`periodo_aluno`:** mostra em que momento do curso a matrícula aconteceu. É calculado na carga a partir da coorte do aluno e do semestre da matrícula, então dispensa uma tabela de matriz curricular por curso.
 - **`qtd_trancamentos`:** as quatro contagens de situação não fechavam com `qtd_matriculados` quando havia trancamento. Agora vale: `qtd_matriculados = qtd_aprovacoes_nota + qtd_aprovacoes_final + qtd_reprovacoes_nota + qtd_reprovacoes_faltas + qtd_trancamentos`.
+- **`curso_disciplina`:** o professor pediu para considerar o período curricular. Ele fica em uma tabela própria porque a mesma disciplina pode estar em períodos diferentes em cada curso.
 - **`vw_turma_professor`:** a turma guarda até três professores em três colunas. A view transforma esses papéis em linhas, o que evita três joins em cada consulta. A coluna `peso` reparte a turma entre os professores em somas gerais. É uma view, então nenhuma tabela muda.
 
 ## SQL equivalente
@@ -57,6 +67,15 @@ ALTER TABLE fato_professor_aluno
 
 ALTER TABLE fato_professor_disciplina
   ADD COLUMN qtd_trancamentos INT NOT NULL AFTER qtd_reprovacoes_faltas;
+
+CREATE TABLE curso_disciplina (
+  id_curso BIGINT NOT NULL,
+  id_disciplina BIGINT NOT NULL,
+  periodo_curricular SMALLINT NOT NULL,
+  PRIMARY KEY (id_curso, id_disciplina),
+  FOREIGN KEY (id_curso) REFERENCES dim_curso (id_curso),
+  FOREIGN KEY (id_disciplina) REFERENCES dim_disciplina (id_disciplina)
+);
 ```
 
 A definição da view está em `sql/04_views.sql`.

@@ -44,5 +44,8 @@ UNION ALL SELECT 'nenhuma matricula antes do ingresso ou apos a saida',
         WHERE f.id_data < t.ano_ingresso * 10 + t.semestre_ingresso OR (a.id_data_saida IS NOT NULL AND f.id_data > a.id_data_saida))
 UNION ALL SELECT 'saida preenchida so para quem saiu',
        (SELECT COUNT(*) FROM dim_aluno WHERE (situacao_vinculo = 'ATIVO') <> (id_data_saida IS NULL))
+UNION ALL SELECT 'toda matricula esta na matriz do curso',
+       (SELECT COUNT(*) FROM fato_professor_aluno f LEFT JOIN curso_disciplina m
+          ON m.id_curso = f.id_curso AND m.id_disciplina = f.id_disciplina WHERE m.id_curso IS NULL)
 UNION ALL SELECT 'pesos da ponte somam 1 por turma',
        (SELECT COUNT(*) FROM (SELECT id_turma_disciplina FROM vw_turma_professor GROUP BY id_turma_disciplina HAVING ABS(SUM(peso) - 1) > 0.001) x);
