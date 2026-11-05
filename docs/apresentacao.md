@@ -9,17 +9,17 @@ Roteiro para quem vai apresentar a construção dos esquemas. O enunciado não d
 ## Antes da aula
 
 - [ ] Abrir o PDF `docs/entrega_03_11.pdf`.
-- [ ] Abrir os diagramas do DrawSQL e confirmar se já têm os ajustes. Se não tiverem, abrir também `docs/mudancas_esquemas.md`.
+- [ ] Abrir o diagrama do DrawSQL e confirmar se já tem os ajustes. Se não tiverem, abrir também `docs/mudancas_esquemas.md`.
 - [ ] Abrir o repositório no navegador.
 - [ ] Decidir como mostrar os dados, seguindo a parte 4. Se for usar o banco, testar a consulta antes da aula.
 
-## Parte 1: os esquemas (2 min)
+## Parte 1: o esquema (2 min)
 
-**Mostrar:** os diagramas PDFs e PDFs 2.
+**Mostrar:** o diagrama do esquema.
 
 **Falar:**
 
-- Temos duas estrelas que compartilham as dimensões de data, curso, disciplina, professor e turma da disciplina.
+- O esquema tem duas estrelas que compartilham as dimensões de data, curso, disciplina, professor e turma da disciplina.
 - `fato_professor_aluno` tem uma linha por matrícula. Ela responde perguntas sobre o aluno, como período, tentativa, cota e evasão.
 - `fato_professor_disciplina` tem uma linha por oferta e curso, sem aluno individual. Ela responde perguntas sobre a turma e a disciplina, como taxas e distribuição de notas.
 - Não existe uma estrela por professor. A turma guarda até três professores, e a view `vw_turma_professor` transforma esses papéis em linhas.
@@ -38,7 +38,7 @@ Roteiro para quem vai apresentar a construção dos esquemas. O enunciado não d
 
 **Se perguntarem sobre as outras:** todas estão no PDF, no mesmo formato.
 
-## Parte 3: ajustes nos esquemas (2 min)
+## Parte 3: ajustes no esquema (2 min)
 
 **Mostrar:** a tabela da seção 2 do PDF, ou `docs/mudancas_esquemas.md`.
 

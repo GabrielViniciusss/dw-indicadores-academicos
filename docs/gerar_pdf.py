@@ -24,67 +24,67 @@ codigo = ParagraphStyle("codigo", parent=corpo, fontName="Courier", fontSize=8.5
 CONSULTAS = [
     ("C1", "Como a taxa de aprovação de cada disciplina crítica (as 10 com maiores taxas de reprovação) mudou de um semestre para outro?",
      "mostra se uma disciplina crítica está melhorando, piorando ou continua igual. Se a aprovação cai vários semestres seguidos, ou muda de repente, a coordenação sabe que precisa investigar e, se for o caso, agir, por exemplo oferecendo monitoria ou revendo a forma de ensinar.",
-     "esquema 2, com os aprovados e os reprovados por nota e por falta de cada turma, em cada semestre.",
+     "estrela agregada, com os aprovados e os reprovados por nota e por falta de cada turma, em cada semestre.",
      "linhas, com os semestres no eixo horizontal e a taxa de aprovação no eixo vertical. Cada linha é uma disciplina, com filtros de disciplina, curso e turma. A dica de cada ponto mostra as reprovações por nota e por falta.",
      "os semestres seguem uma ordem, e a linha mostra com facilidade se a taxa está subindo, caindo ou mudando de repente. Em colunas, seriam 160 barras (16 semestres vezes 10 disciplinas)."),
     ("C2", "Em cada semestre, quais são as 10 disciplinas com maior taxa de reprovação, e quanto dessa taxa vem de nota e de falta?",
      "indica onde concentrar monitoria e apoio em cada semestre. Separar nota e falta ajuda a escolher a ação, pois reforço de conteúdo pode não resolver um problema de faltas.",
-     "esquema 2, com as reprovações por nota e por falta, as matrículas e os trancamentos de cada turma.",
+     "estrela agregada, com as reprovações por nota e por falta, as matrículas e os trancamentos de cada turma.",
      "barras horizontais ordenadas e empilhadas (nota e falta), com filtros de semestre e curso.",
      "as disciplinas não têm uma ordem própria, e os nomes longos cabem melhor na horizontal. A ordenação já mostra o ranking. Pizza não serve, porque as taxas não somam 100%."),
     ("C3", "Em cada semestre, como as matrículas das disciplinas críticas se dividem entre aprovação por nota, aprovação na final, reprovação por nota, reprovação por falta e trancamento?",
      "mostra o tipo de problema de cada disciplina. Muita reprovação por nota aponta dificuldade com o conteúdo, enquanto muita reprovação por falta aponta abandono da disciplina.",
-     "esquema 2, com as contagens de cada situação por turma.",
+     "estrela agregada, com as contagens de cada situação por turma.",
      "barras empilhadas em 100%, uma por disciplina, com filtros de semestre, curso e turma.",
      "cada barra é um total dividido em partes, o que facilita comparar disciplinas. Várias pizzas seriam difíceis de comparar."),
     ("C4", "Em um curso, quais professores têm taxa de reprovação mais distante da média das disciplinas que ministram?",
      "mostra onde a reprovação de um professor foge do padrão daquela disciplina. Isso ajuda a coordenação a investigar a causa, alinhar critérios de avaliação e identificar boas práticas. O resultado não prova que o professor causou a diferença e não deve ser usado sozinho para avaliá-lo.",
-     "esquema 2, com as reprovações por nota e por falta de cada turma, e a lista de professores por turma.",
+     "estrela agregada, com as reprovações por nota e por falta de cada turma, e a lista de professores por turma.",
      "barras divergentes em torno de zero, uma por professor, com filtros de curso e semestre. A dica mostra as disciplinas e o número de alunos.",
      "o zero representa a média das disciplinas. Assim, fica fácil ver quem está acima ou abaixo do esperado e por quanto. Mostrar o número de alunos evita tirar conclusões de turmas pequenas."),
     ("C5", "Como a taxa de reprovação das disciplinas críticas evoluiu por semestre e período curricular?",
      "mostra quando e onde ocorreram os piores resultados, sem misturar semestres diferentes. Isso permite investigar o que aconteceu naquele semestre.",
-     "esquema 2 e o período curricular da disciplina em cada curso (tabela curso_disciplina).",
+     "estrela agregada e o período curricular da disciplina em cada curso (tabela curso_disciplina).",
      "mapa de calor, com as disciplinas nas linhas, ordenadas pelo período curricular, os semestres nas colunas e a taxa de reprovação na cor, com filtro de curso.",
      "são até 160 valores (10 disciplinas vezes 16 semestres). A cor destaca os piores casos de imediato, enquanto 10 linhas sobrepostas ficariam difíceis de ler. O filtro é necessário porque o período de uma disciplina pode mudar de um curso para outro."),
     ("C6", "Em cada oferta de disciplina, como a taxa de reprovação se relaciona com a média de faltas?",
      "ajuda a identificar turmas em que as faltas acompanham as reprovações e onde pode valer agir sobre frequência. O gráfico mostra uma relação, não a causa.",
-     "esquema 2, com as faltas e as reprovações de cada turma.",
+     "estrela agregada, com as faltas e as reprovações de cada turma.",
      "dispersão, com um ponto por turma, média de faltas em um eixo e taxa de reprovação no outro, e filtros de semestre e curso.",
      "é o gráfico indicado para ver a relação entre duas medidas numéricas, e cada ponto mantém a turma visível. Usamos a média de faltas porque a soma cresce com o tamanho da turma."),
     ("C7", "Em uma mesma disciplina, qual é a relação da taxa de aprovação, da nota média e do número de alunos com os diferentes professores e turmas?",
      "mostra em quais disciplinas vale reunir os professores para alinhar plano de ensino e critérios de avaliação. A consulta não serve para ranquear professores.",
-     "esquema 2 e a lista de professores por turma.",
+     "estrela agregada e a lista de professores por turma.",
      "tabela com barra de dados, filtrada por disciplina e semestre.",
      "aqui o valor exato e o número de alunos importam. O filtro compara professores só dentro da mesma disciplina, porque um ranking geral prejudicaria quem ensina as matérias mais difíceis."),
     ("C8", "Como as reprovações por nota e por falta se distribuem conforme o período em que os alunos estão no curso, em cada semestre?",
      "mostra em que momento do curso os alunos têm mais dificuldade, para concentrar o acompanhamento nesses períodos.",
-     "esquema 1, com o resultado de cada matrícula e o período do aluno naquele semestre.",
+     "estrela por aluno, com o resultado de cada matrícula e o período do aluno naquele semestre.",
      "colunas empilhadas (nota e falta) por período do aluno, com filtros de semestre, curso e turma de ingresso.",
      "os períodos são separados e seguem uma ordem, então a coluna deixa claro onde está o pico. Há mais matrículas nos primeiros períodos, por isso a dica também mostra o total."),
     ("C9", "Em cada turma de ingresso, qual é a proporção de alunos que concluíram, que seguem ativos e que evadiram?",
      "permite comparar as turmas de ingresso e identificar aquelas com evasão mais alta, para investigar a causa e planejar ações de permanência.",
-     "esquema 1, com a situação do aluno no curso e a turma de ingresso.",
+     "estrela por aluno, com a situação do aluno no curso e a turma de ingresso.",
      "barras empilhadas em 100%, uma por turma de ingresso, com filtro de curso.",
      "toda turma soma 100%. A parte de ativos evita uma leitura errada: as turmas mais novas concluíram pouco porque ainda estão no curso, e a evasão delas ainda pode subir."),
     ("C10", "Em cada turma de ingresso, como as taxas de reprovação e de evasão variam entre os tipos de cota e as faixas econômicas?",
      "ajuda a decidir quais grupos priorizar em acolhimento, nivelamento e assistência estudantil. O resultado mostra onde há mais dificuldade, não a causa.",
-     "esquema 1, com o resultado das matrículas, a situação do aluno, o tipo de cota, a faixa econômica e a turma de ingresso.",
+     "estrela por aluno, com o resultado das matrículas, a situação do aluno, o tipo de cota, a faixa econômica e a turma de ingresso.",
      "dois gráficos de barras horizontais, um de reprovação e outro de evasão, com filtros de faixa econômica, curso e turma de ingresso.",
      "gráficos separados evitam um eixo duplo, que sugeriria relações que dependem só da escala. O número de alunos aparece junto, porque grupos pequenos oscilam muito."),
     ("C11", "Em cada turma de ingresso, quanto o tempo de conclusão se afasta do prazo previsto do curso?",
      "mostra quais turmas e cursos levam mais tempo para concluir, o que ajuda a planejar a oferta de disciplinas e o acompanhamento de alunos atrasados.",
-     "esquema 1, com a turma de ingresso, o semestre de saída dos alunos que concluíram e o prazo previsto do curso.",
+     "estrela por aluno, com a turma de ingresso, o semestre de saída dos alunos que concluíram e o prazo previsto do curso.",
      "barras com um marcador do prazo previsto, uma por turma de ingresso, com filtro de curso. Sem ferramenta para isso, colunas agrupadas (previsto e real) cumprem o papel.",
      "o marcador compara cada barra com a meta do próprio curso, já que os prazos são diferentes. Só entram alunos que concluíram, então as turmas mais novas ainda podem mudar."),
     ("C12", "Em cada disciplina, como a taxa de aprovação muda da 1ª para a 2ª tentativa, e para a 3ª ou mais?",
      "mostra se repetir a disciplina tem ajudado os alunos e em quais casos eles precisam de apoio específico ao voltar a cursá-la.",
-     "esquema 1, com o número da tentativa e o resultado de cada matrícula.",
+     "estrela por aluno, com o número da tentativa e o resultado de cada matrícula.",
      "colunas (1ª, 2ª, 3ª ou mais), com filtros de disciplina, curso e semestre.",
      "são só três categorias em ordem e uma medida, então o gráfico mais simples basta."),
     ("C13", "Como as taxas de reprovação e de evasão de beneficiários da assistência estudantil se comparam com as de não beneficiários, em cada curso e semestre?",
      "ajuda a gestão a acompanhar se os alunos atendidos estão reprovando e evadindo menos ou mais do que os demais do mesmo curso, e a planejar a assistência. A diferença entre os grupos não prova que o benefício causou o resultado, porque beneficiários e não beneficiários podem ter perfis diferentes.",
-     "esquema 1, com o curso, o semestre, o resultado de cada matrícula, a indicação de benefício no semestre, a situação do aluno e o semestre de saída.",
+     "estrela por aluno, com o curso, o semestre, o resultado de cada matrícula, a indicação de benefício no semestre, a situação do aluno e o semestre de saída.",
      "dois gráficos de linhas, um de reprovação e outro de evasão. Os semestres ficam no eixo horizontal, com uma linha para beneficiários e outra para não beneficiários, e filtro de curso. A dica mostra o número de alunos.",
      "os semestres seguem uma ordem, e a distância entre as linhas é a informação principal. Reprovação e evasão ficam em gráficos separados para evitar dois eixos. O filtro mantém a comparação dentro do mesmo curso, e o número de alunos evita tirar conclusões de grupos pequenos."),
 ]
@@ -135,9 +135,9 @@ def rodape(canvas, doc):
 def main():
     h = []
     h.append(Paragraph("Construção dos esquemas", titulo))
-    h.append(Paragraph("Data Warehouse, UFPE. Entrega da aula de 03/11/2026, atualizada para o dia 05/11/2026, sobre os esquemas PDFs e PDFs 2.<br/>Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb.", sub))
-    h.append(Paragraph("<b>Esquema 1:</b> tabela com uma linha por matrícula de aluno (fato_professor_aluno).", corpo))
-    h.append(Paragraph("<b>Esquema 2:</b> tabela com os totais de cada turma por curso e semestre (fato_professor_disciplina).", corpo))
+    h.append(Paragraph("Data Warehouse, UFPE. Entrega da aula de 03/11/2026, atualizada para o dia 05/11/2026, sobre o esquema do projeto, com duas estrelas.<br/>Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb.", sub))
+    h.append(Paragraph("<b>Estrela por aluno:</b> tabela com uma linha por matrícula de aluno (fato_professor_aluno).", corpo))
+    h.append(Paragraph("<b>Estrela agregada:</b> tabela com os totais de cada turma por curso e semestre (fato_professor_disciplina).", corpo))
 
     h.append(Paragraph("1. Consultas e escolha dos gráficos", secao))
     largura = 12.5 * cm
@@ -153,7 +153,7 @@ def main():
         ]))
 
     h.append(KeepTogether([
-        Paragraph("2. Ajustes nos esquemas", secao),
+        Paragraph("2. Ajustes no esquema", secao),
         Paragraph("Mantivemos os grãos, as chaves e as dimensões compartilhadas. Foram seis acréscimos:", corpo),
         tabela(AJUSTES, [5 * cm, 8 * cm, 3 * cm], ["Ajuste", "Por que", "Consultas"]),
     ]))
@@ -161,7 +161,7 @@ def main():
     h.append(Paragraph(
         "<b>Pendências do grupo.</b> Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de "
         "origem. Se não estiverem, C9, C10, C11 e C13 perdem a base com os dados reais. Sexo e faixa etária, usados no TCC, "
-        "não foram incluídos porque não sabemos se a fonte traz esses dados. Os ajustes nos diagramas do DrawSQL estão listados "
+        "não foram incluídos porque não sabemos se a fonte traz esses dados. Os ajustes para o diagrama do DrawSQL estão listados "
         "em docs/mudancas_esquemas.md, e o arquivo sql/01_ddl.sql já tem a versão final.", corpo))
 
     h.append(Paragraph("3. Dados sintéticos", secao))

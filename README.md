@@ -1,6 +1,6 @@
 # DW de indicadores acadêmicos
 
-Trabalho da disciplina de Data Warehouse (UFPE), sobre os esquemas PDFs e PDFs 2. Todos os dados são fictícios.
+Trabalho da disciplina de Data Warehouse (UFPE), sobre o esquema do projeto, com duas estrelas. Todos os dados são fictícios.
 
 ## Como rodar
 
