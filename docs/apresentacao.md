@@ -83,12 +83,9 @@ sudo mysql --table < sql/05_consultas.sql | less
 
 Também dá para abrir `dados/csv/fato_professor_aluno.csv` no GitHub para mostrar os dados linha a linha.
 
-## Parte 5: pendência e próximo passo (1 min)
+## Parte 5: próximo passo (1 min)
 
-**Falar:**
-
-- Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de origem. C9, C10, C11 e C13 dependem desses campos.
-- O próximo passo é transformar essas consultas em painéis, usando os mesmos dados.
+**Falar:** o próximo passo é transformar essas consultas em painéis, usando os mesmos dados.
 
 ## Perguntas que podem aparecer
 
@@ -112,6 +109,3 @@ Não dá para concluir isso com estes dados. No gerador, o benefício não influ
 
 **A C4 serve para avaliar professores?**
 Não sozinha. Ela aponta onde investigar a causa e alinhar critérios. Nos dados sintéticos, o professor não influencia o resultado, então as diferenças são acaso.
-
-**O que acontece se os campos novos não existirem na fonte real?**
-C9, C10, C11 e C13 não poderiam ser feitas com os dados reais. As outras nove continuam valendo.

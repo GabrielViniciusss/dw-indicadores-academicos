@@ -159,10 +159,8 @@ def main():
     ]))
     h.append(Spacer(1, 8))
     h.append(Paragraph(
-        "<b>Pendências do grupo.</b> Ainda falta confirmar se a situação de vínculo e o semestre de saída estão nos PDFs de "
-        "origem. Se não estiverem, C9, C10, C11 e C13 perdem a base com os dados reais. Sexo e faixa etária, usados no TCC, "
-        "não foram incluídos porque não sabemos se a fonte traz esses dados. Os ajustes para o diagrama do DrawSQL estão listados "
-        "em docs/mudancas_esquemas.md, e o arquivo sql/01_ddl.sql já tem a versão final.", corpo))
+        "Os ajustes para o diagrama do DrawSQL estão listados em docs/mudancas_esquemas.md, e o arquivo sql/01_ddl.sql já tem a "
+        "versão final.", corpo))
 
     h.append(Paragraph("3. Dados sintéticos", secao))
     h.append(Paragraph(
