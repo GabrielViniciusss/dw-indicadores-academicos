@@ -89,6 +89,9 @@ CONSULTAS = [
      "os semestres seguem uma ordem, e a distância entre as linhas é a informação principal. Reprovação e evasão ficam em gráficos separados para evitar dois eixos. O filtro mantém a comparação dentro do mesmo curso, e o número de alunos evita tirar conclusões de grupos pequenos."),
 ]
 
+# consultas marcadas pelo grupo para discutir com o professor
+A_DISCUTIR = {"C2", "C12"}
+
 AJUSTES = [
     ("<b>situacao_vinculo</b> e <b>id_data_saida</b> em dim_aluno", "O esquema registrava matrículas, mas não dizia quem concluiu ou evadiu, nem quando.", "C9, C10, C11, C13"),
     ("<b>semestres_previstos</b> em dim_curso", "Sem o prazo de cada curso, não há com o que comparar o tempo de conclusão.", "C11"),
@@ -140,7 +143,7 @@ def main():
     largura = 12.5 * cm
     for num, perg, serve, dados, grafico, porque in CONSULTAS:
         h.append(KeepTogether([
-            Paragraph(f"{num}. {perg}", pergunta),
+            Paragraph(f"{'#' if num in A_DISCUTIR else ''}{num}. {perg}", pergunta),
             Paragraph(f"<b>Para que serve:</b> {serve}", corpo),
             Paragraph(f"<b>Dados usados:</b> {dados}", corpo),
             Paragraph(f"<b>Gráfico:</b> {grafico}", corpo),

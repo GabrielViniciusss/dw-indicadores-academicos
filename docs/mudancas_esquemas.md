@@ -2,7 +2,7 @@
 
 Comparação entre os diagramas [PDFs](https://drawsql.app/teams/maria-fernanda-fa/diagrams/pdfs) e [PDFs 2](https://drawsql.app/teams/maria-fernanda-fa/diagrams/pdfs-2), lidos em 02/11/2026, e o arquivo `sql/01_ddl.sql`.
 
-Os diagramas ainda não foram alterados. Eles precisam receber os acréscimos abaixo.
+O projeto agora tem um único esquema, em `docs/dbml/dw_academico.dbml`, com as duas estrelas juntas. Para atualizar o DrawSQL, use esse arquivo em um único diagrama, em vez de manter PDFs e PDFs 2 separados.
 
 ## Resumo
 
