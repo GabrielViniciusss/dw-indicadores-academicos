@@ -1,0 +1,104 @@
+Project Estrela_02_Professor_Disciplina {
+  database_type: 'PostgreSQL'
+  Note: 'Entrega 2 de 2. Fato agregada SEM aluno: uma oferta de disciplina x curso x semestre. Indicadores de rendimento conforme proposta do professor; faixas continuas sem lacunas (nota final sem arredondamento para classificar); cardinalidades 1:N.'
+}
+
+// AZUL: FATO PRINCIPAL (NAO POSSUI id_aluno)
+Table fato_professor_disciplina [headercolor: #2563EB, note: 'GRAO: uma linha para cada oferta de disciplina x curso dos alunos x semestre. FatoRendimentoDisciplina agregada, SEM aluno individual.'] {
+  id_professor_disciplina bigint [pk]
+  id_disciplina bigint [not null]
+  id_turma_disciplina bigint [not null]
+  id_curso bigint [not null]
+  id_data bigint [not null]
+
+  qtd_matriculados int [not null, default: 0]
+  qtd_aprovacoes_nota int [not null, default: 0]
+  qtd_aprovacoes_final int [not null, default: 0]
+  qtd_reprovacoes_nota int [not null, default: 0]
+  qtd_reprovacoes_faltas int [not null, default: 0]
+
+  menor_notas decimal(5,2)
+  maior_notas decimal(5,2)
+  mediana_notas decimal(5,2) [note: 'Nao aditiva: a mediana geral nao vem da mediana das medianas']
+  media_notas decimal(5,2) [note: 'Media final dos alunos da oferta e curso']
+  media_faltas decimal(8,2)
+  soma_notas_finais decimal(14,2) [not null, default: 0]
+  qtd_notas_validas int [not null, default: 0]
+  soma_faltas int [not null, default: 0]
+  qtd_faltas_validas int [not null, default: 0]
+
+  qtd_nota_0_2_9 int [not null, default: 0, note: '0 <= nota_final < 3,0 (inclui 2,95)']
+  qtd_nota_3_6_9 int [not null, default: 0, note: '3,0 <= nota_final < 7,0 (inclui 6,95)']
+  qtd_nota_7_7_9 int [not null, default: 0, note: '7,0 <= nota_final < 8,0 (inclui 7,95)']
+  qtd_nota_8_8_9 int [not null, default: 0, note: '8,0 <= nota_final < 9,0 (inclui 8,95)']
+  qtd_nota_9_10 int [not null, default: 0, note: '9,0 <= nota_final <= 10,0']
+
+  qtd_bolsistas_aprovados_nota int [not null, default: 0]
+  qtd_bolsistas_aprovados_final int [not null, default: 0]
+  qtd_bolsistas_reprovados_nota int [not null, default: 0]
+  qtd_bolsistas_reprovados_faltas int [not null, default: 0]
+
+  indexes {
+    (id_turma_disciplina, id_curso, id_data) [unique]
+  }
+}
+
+// VERDE: DIMENSOES CONFORMADAS
+Table dim_disciplina [headercolor: #0F766E] {
+  id_disciplina bigint [pk]
+  codigo_disciplina varchar(30)
+  nome_disciplina varchar(160)
+  carga_horaria int
+  creditos int
+}
+
+Table dim_curso [headercolor: #0F766E] {
+  id_curso bigint [pk]
+  codigo_curso varchar(30)
+  nome_curso varchar(160)
+  departamento varchar(120)
+  centro varchar(120)
+  campus varchar(120)
+}
+
+Table dim_data [headercolor: #0F766E] {
+  id_data bigint [pk]
+  ano smallint
+  semestre smallint
+  ano_semestre varchar(6) [unique]
+}
+
+// ROXO: OFERTA E OUTTRIGGER PARA OS ATE TRES PROFESSORES
+Table dim_turma_disciplina [headercolor: #7C3AED, note: 'Uma turma ofertada em determinado semestre; professores nos tres papeis abaixo.'] {
+  id_turma_disciplina bigint [pk]
+  id_disciplina bigint [not null]
+  id_data bigint [not null]
+  codigo_turma varchar(40)
+  horario varchar(200)
+  id_professor_1 bigint
+  id_professor_2 bigint
+  id_professor_3 bigint
+
+  indexes {
+    (id_disciplina, id_data, codigo_turma) [unique]
+  }
+}
+
+Table dim_professor [headercolor: #7C3AED, note: 'Mesma dimensao Professor utilizada pelos 3 papeis da turma.'] {
+  id_professor bigint [pk]
+  matricula_professor varchar(30)
+  nome_professor varchar(160)
+}
+
+// CARDINALIDADES: 1 < N
+Ref: dim_disciplina.id_disciplina < fato_professor_disciplina.id_disciplina
+Ref: dim_turma_disciplina.id_turma_disciplina < fato_professor_disciplina.id_turma_disciplina
+Ref: dim_curso.id_curso < fato_professor_disciplina.id_curso
+Ref: dim_data.id_data < fato_professor_disciplina.id_data
+
+// OUTTRIGGERS
+Ref: dim_disciplina.id_disciplina < dim_turma_disciplina.id_disciplina
+Ref: dim_data.id_data < dim_turma_disciplina.id_data
+Ref: dim_professor.id_professor < dim_turma_disciplina.id_professor_1
+Ref: dim_professor.id_professor < dim_turma_disciplina.id_professor_2
+Ref: dim_professor.id_professor < dim_turma_disciplina.id_professor_3

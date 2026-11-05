@@ -1,0 +1,107 @@
+Project Estrela_01_Professor_Aluno {
+  database_type: 'PostgreSQL'
+  Note: 'Entrega 1 de 2. Fato individual: um aluno em uma oferta de disciplina, vinculado a um curso e semestre. Cardinalidades 1:N. Ate 3 professores via outtrigger de TurmaDisciplina.'
+}
+
+// AZUL: FATO PRINCIPAL
+Table fato_professor_aluno [headercolor: #2563EB, note: 'GRAO: 1 linha para cada aluno x oferta da disciplina x curso. A matricula nao e duplicada se houver dois ou tres professores.'] {
+  id_professor_aluno bigint [pk]
+  id_aluno bigint [not null]
+  id_turma_disciplina bigint [not null]
+  id_disciplina bigint [not null]
+  id_curso bigint [not null]
+  id_data bigint [not null]
+
+  situacao_final varchar(35) [note: 'APROVADO_NOTA, APROVADO_FINAL, REPROVADO_NOTA, REPROVADO_FALTAS, TRANCADO_DISCIPLINA etc.']
+  nota_final decimal(5,2) [note: 'Media final do aluno nesta tentativa de disciplina']
+  quantidade_faltas int
+  ch_adquirida int [not null, default: 0]
+  bolsista_no_semestre boolean
+  qtd_tentativas int [not null, default: 1]
+
+  indexes {
+    (id_aluno, id_turma_disciplina, id_curso) [unique]
+  }
+}
+
+// VERDE: DIMENSOES DIRETAMENTE CONFORMADAS
+Table dim_aluno [headercolor: #0F766E, note: 'Aluno e sua coorte de ingresso.'] {
+  id_aluno bigint [pk]
+  id_turma_aluno bigint [not null]
+  numero_matricula varchar(30) [not null, unique]
+  nome varchar(160)
+  forma_ingresso varchar(50)
+  tipo_cota varchar(120)
+  faixa_economica varchar(60)
+  versao_curriculo varchar(60)
+}
+
+Table dim_disciplina [headercolor: #0F766E] {
+  id_disciplina bigint [pk]
+  codigo_disciplina varchar(30)
+  nome_disciplina varchar(160)
+  carga_horaria int
+  creditos int
+}
+
+Table dim_curso [headercolor: #0F766E] {
+  id_curso bigint [pk]
+  codigo_curso varchar(30)
+  nome_curso varchar(160)
+  departamento varchar(120)
+  centro varchar(120)
+  campus varchar(120)
+}
+
+Table dim_data [headercolor: #0F766E, note: 'Período letivo do registro: dimensao compartilhada com a segunda estrela.'] {
+  id_data bigint [pk]
+  ano smallint
+  semestre smallint
+  ano_semestre varchar(6) [unique]
+}
+
+// ROXO: DIMENSOES DE TURMA E OUTTRIGGER DE PROFESSOR
+Table dim_turma_disciplina [headercolor: #7C3AED, note: 'Oferta especifica de disciplina no semestre. Os tres IDs de professor representam papeis da MESMA dimensao Professor.'] {
+  id_turma_disciplina bigint [pk]
+  id_disciplina bigint [not null]
+  id_data bigint [not null]
+  codigo_turma varchar(40)
+  horario varchar(200)
+  id_professor_1 bigint
+  id_professor_2 bigint
+  id_professor_3 bigint
+
+  indexes {
+    (id_disciplina, id_data, codigo_turma) [unique]
+  }
+}
+
+Table dim_professor [headercolor: #7C3AED, note: 'Dimensao reutilizada nos papeis Professor 1, Professor 2, Professor 3.'] {
+  id_professor bigint [pk]
+  matricula_professor varchar(30)
+  nome_professor varchar(160)
+}
+
+Table dim_turma_aluno [headercolor: #7C3AED, note: 'Coorte de ingresso do aluno: NAO e a turma da disciplina cursada.'] {
+  id_turma_aluno bigint [pk]
+  id_curso bigint [not null]
+  ano_ingresso smallint
+  semestre_ingresso smallint
+  ano_semestre_ingresso varchar(6)
+}
+
+// CARDINALIDADE: dimensao 1 < N fato
+Ref: dim_aluno.id_aluno < fato_professor_aluno.id_aluno
+Ref: dim_turma_disciplina.id_turma_disciplina < fato_professor_aluno.id_turma_disciplina
+Ref: dim_disciplina.id_disciplina < fato_professor_aluno.id_disciplina
+Ref: dim_curso.id_curso < fato_professor_aluno.id_curso
+Ref: dim_data.id_data < fato_professor_aluno.id_data
+
+// OUTTRIGGERS (1:N)
+Ref: dim_turma_aluno.id_turma_aluno < dim_aluno.id_turma_aluno
+Ref: dim_curso.id_curso < dim_turma_aluno.id_curso
+Ref: dim_disciplina.id_disciplina < dim_turma_disciplina.id_disciplina
+Ref: dim_data.id_data < dim_turma_disciplina.id_data
+Ref: dim_professor.id_professor < dim_turma_disciplina.id_professor_1
+Ref: dim_professor.id_professor < dim_turma_disciplina.id_professor_2
+Ref: dim_professor.id_professor < dim_turma_disciplina.id_professor_3
