@@ -2,6 +2,14 @@
 
 Trabalho da disciplina de Data Warehouse (UFPE), sobre o esquema do projeto, com duas estrelas. Todos os dados são fictícios.
 
+## Segunda parte — visualização dos dados (05/11)
+
+O [painel interativo](dashboards/painel_academico_interativo.html) funciona offline no navegador e usa os dados sintéticos de `dados/csv`. Baixe o arquivo para abri-lo; o GitHub exibe apenas seu código.
+
+São quatro páginas: visão geral (C1–C3), desempenho acadêmico (C5, C6, C8, C12), permanência e equidade (C9–C11, C13) e turmas e docência (C4, C7). Há modo de foco por consulta, filtros globais e específicos, alternância gráfico/tabela, comparação semestral, investigação por disciplina e links que preservam o recorte, além de CSV e PDF.
+
+Consulte a [prévia PDF](dashboards/previa_paineis.pdf) e as [instruções de reprodução e montagem no Metabase](dashboards/LEIA-ME.md). O HTML é um protótipo independente. O ambiente Docker e o importador do Metabase foram testados: criam quatro dashboards e 13 perguntas nativas. As instruções explicam como reproduzir essa configuração inicial e ajustar os filtros e gráficos no editor.
+
 ## Como rodar
 
 Precisa de MySQL 8 e Python 3, sem bibliotecas extras.
@@ -25,11 +33,11 @@ sudo dpkg --configure -a
 
 | Caminho | Conteúdo |
 | --- | --- |
-| `docs/entrega_03_11.pdf` | Entrega da aula de 03/11, atualizada para 05/11 |
+| `docs/entrega_05_11.pdf` | Entrega da aula de 03/11, atualizada para 05/11 |
 | `docs/graficos/` | Exemplos ilustrativos de cada consulta |
 | `docs/apresentacao.md` | Roteiro para quem vai apresentar |
 | `docs/mudancas_esquemas.md` | O que mudou em relação aos diagramas do DrawSQL |
-| `docs/dbml/dw_academico.dbml` | O esquema completo em DBML, com as duas estrelas |
+| `docs/dbml/v2_esquema.dbml` | O esquema completo em DBML, com as duas estrelas |
 | `sql/01_ddl.sql` | Tabelas, com os ajustes marcados como `[AJUSTE]` |
 | `sql/02_dados_sinteticos.sql` | Dados gerados |
 | `sql/03_carga_fato_agregada.sql` | Deriva a fato agregada da fato por aluno |
@@ -38,3 +46,4 @@ sudo dpkg --configure -a
 | `sql/06_validacao.sql` | Testes, todos devem dar zero erros |
 | `gerador/gerar_dados.py` | Gerador dos dados |
 | `dados/csv/` | Tabelas em CSV para importar no painel |
+| `dashboards/` | Protótipo interativo, prévia PDF, fontes e preparação para Metabase |
