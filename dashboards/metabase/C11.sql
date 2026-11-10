@@ -1,4 +1,4 @@
--- C11. Em cada turma de ingresso, quanto o tempo de conclusao se afasta do prazo previsto do curso?
+-- C11. Quanto o tempo de conclusao de cada turma de ingresso se afasta do prazo previsto do curso?
 -- DADOS SINTÉTICOS; não representam a UFPE.
 SELECT c.codigo_curso, t.ano_semestre_ingresso, c.semestres_previstos, COUNT(*) AS concluintes,
        ROUND(AVG((ds.ano * 2 + ds.semestre) - (t.ano_ingresso * 2 + t.semestre_ingresso) + 1), 1) AS media_semestres,

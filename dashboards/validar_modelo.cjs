@@ -17,22 +17,18 @@ process.stdin.on('end',()=>{
  const byTeacher=model.compute({docente:String(teacher)});
  assert.ok(byTeacher.selected.length>0);
  assert.ok(byTeacher.selected.every(row=>taught.has(row.id_turma_disciplina)));
- assert.ok(byTeacher.queries.C4.every(row=>row.nome_professor===data.dim_professor.find(t=>t.id_professor===teacher).nome_professor));
- assert.ok(byTeacher.queries.C7.every(row=>row.nome_professor===data.dim_professor.find(t=>t.id_professor===teacher).nome_professor));
+ assert.ok(byTeacher.queries.C12.every(row=>row.nome_professor===data.dim_professor.find(t=>t.id_professor===teacher).nome_professor));
  const student=data.dim_aluno.find(row=>row.id_aluno===seed.id_aluno);
  const equity=model.selectRows({cota:student.tipo_cota??'Outras formas de ingresso',renda:student.faixa_economica});
  assert.ok(equity.length>0);
  assert.ok(equity.every(row=>{const s=data.dim_aluno.find(a=>a.id_aluno===row.id_aluno);return (s.tipo_cota??'Outras formas de ingresso')===(student.tipo_cota??'Outras formas de ingresso')&&s.faixa_economica===student.faixa_economica;}));
- const period=model.selectRows({periodo:String(seed.periodo_aluno)});
- assert.ok(period.length>0&&period.every(row=>row.periodo_aluno===seed.periodo_aluno));
- const curriculum=data.curso_disciplina[0];
- const curricular=model.selectRows({curso:String(curriculum.id_curso),periodo_curricular:String(curriculum.periodo_curricular)});
- assert.ok(curricular.length>0);
- assert.ok(curricular.every(row=>data.curso_disciplina.some(c=>c.id_curso===row.id_curso&&c.id_disciplina===row.id_disciplina&&c.periodo_curricular===curriculum.periodo_curricular)));
+ const period=model.selectRows({periodo:'9+'});
+ assert.ok(period.length>0&&period.every(row=>row.periodo_aluno>=9));
  // Vínculo final não é filtrado por semestre da matrícula nem por disciplina.
- assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C9,baseline.queries.C9);
+ assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C2,baseline.queries.C2);
  assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C11,baseline.queries.C11);
- // A referência histórica da docência é estável quando muda o recorte de semestre.
+ // O histórico de C10 vem da base completa: filtrar o semestre não muda a comparação.
+ assert.deepEqual(model.compute({semestre:'20252'}).queries.C10,baseline.queries.C10.filter(row=>row.ano_semestre==='2025.2'));
  const comparison=model.compareSemesters({curso:'1',semestre:'20252'});
  assert.equal(comparison.current,'2025.2');assert.equal(comparison.previous,'2025.1');
  const a=model.summarize(model.rows.filter(row=>row.id_curso===1&&row.id_data===20252));

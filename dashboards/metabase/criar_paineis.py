@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cria uma coleção nova, 13 perguntas e quatro dashboards pela API do Metabase.
+"""Cria uma coleção nova, 12 perguntas e quatro dashboards pela API do Metabase.
 Não configura usuários nem altera perguntas preexistentes. Reexecutar cria outra coleção.
 """
 import argparse
@@ -11,26 +11,25 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PANELS = [
-    ('1. Visão geral', [1, 2, 3]),
-    ('2. Desempenho acadêmico', [5, 6, 8, 12]),
-    ('3. Permanência e equidade', [9, 10, 11, 13]),
-    ('4. Turmas e docência', [4, 7]),
+    ('1. Visão geral', [1, 6, 7]),
+    ('2. Desempenho acadêmico', [4, 5, 9]),
+    ('3. Permanência e equidade', [2, 3, 8, 11]),
+    ('4. Turmas e docência', [10, 12]),
 ]
 # Primeira configuração de gráficos. As dimensões do SQL permanecem na pergunta.
 CHARTS = {
-    1: ('line', ['ano_semestre', 'nome_disciplina'], ['taxa_aprovacao']),
-    2: ('bar', ['nome_disciplina', 'ano_semestre'], ['reprovacao_nota', 'reprovacao_falta']),
-    3: ('bar', ['nome_disciplina', 'ano_semestre'], ['aprovado_nota', 'aprovado_final', 'reprovado_nota', 'reprovado_falta', 'trancado']),
-    4: ('bar', ['nome_professor', 'codigo_curso'], ['diferenca_pontos']),
-    5: ('table', [], []),  # mapa de calor: aplicar formatação condicional no editor
-    6: ('scatter', ['media_faltas'], ['taxa_reprovacao']),
-    7: ('table', [], []),
-    8: ('bar', ['periodo_aluno', 'ano_semestre'], ['reprovacoes_nota', 'reprovacoes_falta']),
-    9: ('bar', ['ano_semestre_ingresso', 'codigo_curso'], ['concluiu', 'ativo', 'evadiu']),
-    10: ('table', [], []),  # dois gráficos separados: reprovação e evasão
+    1: ('bar', ['nome_disciplina', 'ano_semestre'], ['reprovacao_nota', 'reprovacao_falta']),
+    2: ('bar', ['ano_semestre_ingresso', 'codigo_curso'], ['concluiu', 'ativo', 'evadiu']),
+    3: ('line', ['ano_semestre', 'grupo'], ['taxa_reprovacao']),
+    4: ('bar', ['periodo', 'ano_semestre'], ['reprovacao_nota', 'reprovacao_falta']),
+    5: ('row', ['nome_disciplina'], ['taxa_recorrente']),
+    6: ('line', ['ano_semestre', 'nome_disciplina'], ['taxa_aprovacao']),
+    7: ('bar', ['nome_disciplina', 'ano_semestre'], ['aprovado_nota', 'aprovado_final', 'reprovado_nota', 'reprovado_falta', 'trancado']),
+    8: ('table', [], []),  # dois gráficos separados: reprovação e evasão
+    9: ('scatter', ['media_faltas'], ['taxa_reprovacao']),
+    10: ('row', ['nome_disciplina', 'codigo_turma'], ['diferenca_pontos']),
     11: ('bar', ['ano_semestre_ingresso', 'codigo_curso'], ['media_semestres', 'semestres_previstos']),
-    12: ('bar', ['tentativa', 'nome_disciplina'], ['taxa_aprovacao']),
-    13: ('line', ['ano_semestre', 'grupo'], ['taxa_reprovacao']),
+    12: ('table', [], []),
 }
 
 
@@ -73,7 +72,7 @@ def main():
                 title = sql.splitlines()[0].removeprefix('-- ')
                 display, dimensions, metrics = CHARTS[number]
                 settings = {'graph.dimensions': dimensions, 'graph.metrics': metrics} if dimensions else {}
-                if number in (2, 3, 8, 9):
+                if number in (1, 2, 4, 7):
                     settings['stackable.stack_type'] = 'stacked'
                 card = api('POST', '/card', {'name': title, 'collection_id': collection['id'],
                            'type': 'question', 'display': display, 'visualization_settings': settings,

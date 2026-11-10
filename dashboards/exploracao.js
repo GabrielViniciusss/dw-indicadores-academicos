@@ -1,8 +1,8 @@
 /* Controles de exploração. Incorporado por build_demo.py no escopo do painel. */
 const globalFilterKeys=['curso','semestre','coorte','disciplina'];
 const allQueryIds=panels.flatMap(p=>p[2]);
-const filterLabels={curso:'Curso',semestre:'Semestre da matrícula',coorte:'Entrada no curso',disciplina:'Disciplina',docente:'Docente',periodo:'Período do aluno',periodo_curricular:'Período curricular',cota:'Tipo de ingresso / cota',renda:'Faixa econômica'};
-const extraFilters={C4:['docente'],C5:['periodo_curricular'],C7:['docente'],C8:['periodo'],C10:['cota','renda']};
+const filterLabels={curso:'Curso',semestre:'Semestre da matrícula',coorte:'Entrada no curso',disciplina:'Disciplina',docente:'Docente',periodo:'Período do aluno',cota:'Tipo de ingresso / cota',renda:'Faixa econômica'};
+const extraFilters={C4:['periodo'],C8:['cota','renda'],C12:['docente']};
 const localFilters={},views={};
 let focusId=null,investigation=null,investigationTab='historico',focusPrinting=false,returnQuery=null;
 let resultCache=new Map(),noticeTimer;
@@ -13,17 +13,15 @@ const expandIcon=icon('<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M3 3l6 6m12-
 const shareIcon=icon('<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2m3 6a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/>');
 const closeIcon=icon('<path d="m6 6 12 12M6 18 18 6"/>');
 function readGlobalFilters(){return Object.fromEntries(globalFilterKeys.map(key=>[key,$(key).value]));}
-function queryFilterKeys(id){return [...globalFilterKeys.filter(key=>!(['C9','C11'].includes(id)&&['semestre','disciplina'].includes(key))),...(extraFilters[id]||[])];}
+function queryFilterKeys(id){return [...globalFilterKeys.filter(key=>!(['C2','C11'].includes(id)&&['semestre','disciplina'].includes(key))),...(extraFilters[id]||[])];}
 function filterOptions(key){
- const numberOptions=values=>[...new Set(values)].sort((a,b)=>a-b).map(v=>[String(v),String(v)+'º período']);
  switch(key){
  case 'curso':return DATA.dim_curso.map(r=>[String(r.id_curso),r.codigo_curso+' · '+r.nome_curso]);
  case 'semestre':return DATA.dim_data.slice().sort((a,b)=>a.id_data-b.id_data).map(r=>[String(r.id_data),r.ano_semestre]);
  case 'coorte':return [...new Set(DATA.dim_turma_aluno.map(r=>r.ano_semestre_ingresso))].sort().map(v=>[v,v]);
  case 'disciplina':return DATA.dim_disciplina.slice().sort((a,b)=>a.nome_disciplina.localeCompare(b.nome_disciplina)).map(r=>[String(r.id_disciplina),r.nome_disciplina]);
  case 'docente':return DATA.dim_professor.slice().sort((a,b)=>a.nome_professor.localeCompare(b.nome_professor)).map(r=>[String(r.id_professor),r.nome_professor]);
- case 'periodo':return numberOptions(model.rows.map(r=>r.periodo_aluno));
- case 'periodo_curricular':return numberOptions(DATA.curso_disciplina.map(r=>r.periodo_curricular));
+ case 'periodo':return [...[1,2,3,4,5,6,7,8].map(v=>[String(v),v+'º período']),['9+','9º período ou mais']];
  case 'cota':return [...new Set(DATA.dim_aluno.map(r=>r.tipo_cota??'Outras formas de ingresso'))].sort().map(v=>[v,v]);
  case 'renda':return [...new Set(DATA.dim_aluno.map(r=>r.faixa_economica).filter(Boolean))].sort().map(v=>[v,v]);
  default:return [];
@@ -67,8 +65,7 @@ function writeUrl(mode='replace'){
  if(focusId)p.set('foco',focusId);
  if(Object.keys(localFilters).length)p.set('consultas',JSON.stringify(localFilters));
  if(Object.keys(views).length)p.set('vistas',JSON.stringify(views));
- if(metrics.C10!=='reprovacao')p.set('metricaC10',metrics.C10);
- if(metrics.C13!=='taxa_reprovacao')p.set('metricaC13',metrics.C13);
+ if(metrics.C8!=='reprovacao')p.set('metricaC8',metrics.C8);
  if(investigation)p.set('investigacao',JSON.stringify({...investigation,tab:investigationTab}));
  const next=new URL(location.href);next.hash=p.toString();
  if(next.href===location.href)return;
@@ -87,15 +84,14 @@ function restoreUrl(){
   if(Object.keys(clean).length)localFilters[id]=clean;
  }
  for(const [id,view] of Object.entries(parse('vistas')))if(allQueryIds.includes(id)&&['grafico','tabela'].includes(view))views[id]=view;
- metrics.C10=p.get('metricaC10')==='evasao'?'evasao':'reprovacao';
- metrics.C13=p.get('metricaC13')==='taxa_evasao'?'taxa_evasao':'taxa_reprovacao';
+ metrics.C8=p.get('metricaC8')==='evasao'?'evasao':'reprovacao';
  focusId=allQueryIds.includes(p.get('foco'))?p.get('foco'):null;
  investigation=null;investigationTab='historico';
  const saved=parse('investigacao');
- if(focusId==='C2'&&Object.hasOwn(model.subjects,String(saved.subjectId))){
+ if(focusId==='C1'&&Object.hasOwn(model.subjects,String(saved.subjectId))){
   const filters=Object.fromEntries(['curso','coorte'].filter(key=>validFilterValue(key,saved.filters?.[key]??'')).map(key=>[key,saved.filters?.[key]||'']));
   investigation={subjectId:String(saved.subjectId),filters,origin:filterOptions('semestre').some(([,label])=>label===saved.origin)?saved.origin:''};
-  if(['historico','faltas','tentativas','turmas'].includes(saved.tab))investigationTab=saved.tab;
+  if(['historico','faltas','turmas'].includes(saved.tab))investigationTab=saved.tab;
  }
  if(focusId){current=panels.findIndex(panel=>panel[2].includes(focusId));returnQuery=focusId;}
  render();activate(current,false);
@@ -125,13 +121,13 @@ function focusFilters(id){
   const currentValue=localFilters[id]&&Object.hasOwn(localFilters[id],key)?localFilters[id][key]:'__painel';
   const inheritedLabel=inherited?(filterOptions(key).find(([v])=>v===globals[key])?.[1]||'Todos'):'Todos';
   return `<label>${filterLabels[key]}<select data-local-query="${id}" data-local-key="${key}" class="${currentValue!=='__painel'?'active':''}"><option value="__painel" ${currentValue==='__painel'?'selected':''}>${inherited?'Do painel: ':'Padrão: '}${escape(inheritedLabel)}</option><option value="" ${currentValue===''?'selected':''}>Todos</option>${filterOptions(key).map(([value,label])=>`<option value="${escape(value)}" ${currentValue===value?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
- }).join('')}</div><div class="focus-filter-footer"><p>${['C9','C11'].includes(id)?'Situação final do vínculo: semestre da matrícula e disciplina não se aplicam.':'A referência histórica de C4 e a seleção de disciplinas críticas permanecem as da base completa.'}</p><button class="button subtle" type="button" data-reset-local="${id}">Usar filtros do painel</button></div></details>`;
+ }).join('')}</div><div class="focus-filter-footer"><p>${['C2','C11'].includes(id)?'Situação final do vínculo: semestre da matrícula e disciplina não se aplicam.':'O histórico de C10 e a seleção de disciplinas críticas permanecem os da base completa.'}</p><button class="button subtle" type="button" data-reset-local="${id}">Usar filtros do painel</button></div></details>`;
 }
 function openInvestigation(subjectId){
  if(!Object.hasOwn(model.subjects,String(subjectId)))return;
- const source=queryContext('C2');
- investigation={subjectId:String(subjectId),filters:{curso:source.filters.curso||'',coorte:source.filters.coorte||''},origin:latest(source.result.queries.C2).semester||''};
- investigationTab='historico';returnQuery='C2';focusId='C2';current=0;activate(0,false);renderFocus();showFocusDialog();$('focus-dialog').scrollTop=0;writeUrl('push');
+ const source=queryContext('C1');
+ investigation={subjectId:String(subjectId),filters:{curso:source.filters.curso||'',coorte:source.filters.coorte||''},origin:latest(source.result.queries.C1).semester||''};
+ investigationTab='historico';returnQuery='C1';focusId='C1';current=0;activate(0,false);renderFocus();showFocusDialog();$('focus-dialog').scrollTop=0;writeUrl('push');
 }
 function subjectHistory(selected){
  return model.group(selected,['nome_disciplina','ano_semestre']).map(g=>{
@@ -141,14 +137,14 @@ function subjectHistory(selected){
 }
 function investigationContext(){
  const filters={...investigation.filters,disciplina:investigation.subjectId,semestre:''};
- const result=computed(filters),id={historico:'C1',faltas:'C6',tentativas:'C12',turmas:'C7'}[investigationTab];
+ const result=computed(filters),id={historico:'C6',faltas:'C9',turmas:'C12'}[investigationTab];
  return {filters,result,id,rows:investigationTab==='historico'?subjectHistory(result.selected):result.queries[id]};
 }
 function renderInvestigation(){
  const c=investigationContext(),subject=model.subjects[investigation.subjectId].nome_disciplina;
- const isTable=views.C2==='tabela';
+ const isTable=views.C1==='tabela';
  const content=isTable?table(c.rows,null,c.id):(investigationTab==='historico'?lines(c.rows,'ano_semestre','nome_disciplina','taxa_aprovacao'):renderChart(c.id,c.result.queries,c.result.selected));
- return `<div class="investigation-intro"><span class="query">DETALHAMENTO DE C2</span><h3>${escape(subject)}</h3><p>Origem: ranking de ${escape(investigation.origin||'reprovação')}. A investigação mostra todos os semestres do mesmo curso e turma de ingresso.</p><p>${escape(filterDescription(c.filters))}</p></div><div class="investigation-tabs" role="group" aria-label="Perspectiva da disciplina">${[['historico','Evolução histórica'],['faltas','Faltas e reprovação'],['tentativas','Tentativas'],['turmas','Turmas e docentes']].map(([tab,label])=>`<button type="button" data-investigation-tab="${tab}" aria-pressed="${investigationTab===tab}">${label}</button>`).join('')}</div><div class="focus-viewbar">${viewSwitch('C2','focus')}<span>Dados sintéticos · ${fmt(c.rows.length,0)} registros</span></div><div class="plot focus-plot"><div class="visual-body">${content}</div></div><p class="focus-methodology">${investigationTab==='historico'?'Aprovação sobre matrículas com resultado; trancamentos excluídos. Inclui esta disciplina mesmo que ela não esteja entre as dez críticas da base.':notes[c.id]}</p><button class="button" type="button" id="back-ranking">Voltar à consulta C2</button>`;
+ return `<div class="investigation-intro"><span class="query">DETALHAMENTO DE C1</span><h3>${escape(subject)}</h3><p>Origem: ranking de ${escape(investigation.origin||'reprovação')}. A investigação mostra todos os semestres do mesmo curso e turma de ingresso.</p><p>${escape(filterDescription(c.filters))}</p></div><div class="investigation-tabs" role="group" aria-label="Perspectiva da disciplina">${[['historico','Evolução histórica'],['faltas','Faltas e reprovação'],['turmas','Turmas e docentes']].map(([tab,label])=>`<button type="button" data-investigation-tab="${tab}" aria-pressed="${investigationTab===tab}">${label}</button>`).join('')}</div><div class="focus-viewbar">${viewSwitch('C1','focus')}<span>Dados sintéticos · ${fmt(c.rows.length,0)} registros</span></div><div class="plot focus-plot"><div class="visual-body">${content}</div></div><p class="focus-methodology">${investigationTab==='historico'?'Aprovação sobre matrículas com resultado; trancamentos excluídos. Inclui esta disciplina mesmo que ela não esteja entre as dez críticas da base.':notes[c.id]}</p><button class="button" type="button" id="back-ranking">Voltar à consulta C1</button>`;
 }
 function renderFocus(){
  if(!focusId)return;

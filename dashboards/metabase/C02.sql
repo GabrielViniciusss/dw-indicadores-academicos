@@ -1,20 +1,12 @@
--- C2. Em cada semestre, quais sao as 10 disciplinas com maior taxa de reprovacao, e quanto vem de nota e de falta?
+-- C2. Em cada turma de ingresso, qual e a proporcao de alunos que concluiram, continuam ativos ou evadiram?
 -- DADOS SINTÉTICOS; não representam a UFPE.
-WITH por_semestre AS (
-  SELECT f.id_data, f.id_disciplina,
-         100 * SUM(f.qtd_reprovacoes_nota) / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0) AS por_nota,
-         100 * SUM(f.qtd_reprovacoes_faltas) / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0) AS por_falta
-  FROM fato_professor_disciplina f
-  GROUP BY f.id_data, f.id_disciplina
-),
-ranking AS (
-  SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.id_data ORDER BY p.por_nota + p.por_falta DESC) AS posicao
-  FROM por_semestre p
-)
-SELECT d.ano_semestre, r.posicao, di.nome_disciplina, ROUND(r.por_nota, 1) AS reprovacao_nota,
-       ROUND(r.por_falta, 1) AS reprovacao_falta, ROUND(r.por_nota + r.por_falta, 1) AS taxa_reprovacao
-FROM ranking r
-JOIN dim_data d ON d.id_data = r.id_data
-JOIN dim_disciplina di ON di.id_disciplina = r.id_disciplina
-WHERE r.posicao <= 10
-ORDER BY d.ano_semestre, r.posicao;
+SELECT c.codigo_curso, t.ano_semestre_ingresso, COUNT(*) AS ingressantes,
+       ROUND(100 * SUM(a.situacao_vinculo = 'CONCLUIDO') / COUNT(*), 1) AS concluiu,
+       ROUND(100 * SUM(a.situacao_vinculo = 'ATIVO') / COUNT(*), 1) AS ativo,
+       ROUND(100 * SUM(a.situacao_vinculo = 'EVADIDO') / COUNT(*), 1) AS evadiu
+FROM dim_aluno a
+JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+JOIN dim_curso c ON c.id_curso = t.id_curso
+WHERE t.ano_ingresso >= 2018 -- turmas anteriores so tem os alunos que ainda estavam no curso em 2018
+GROUP BY c.codigo_curso, t.ano_semestre_ingresso
+ORDER BY c.codigo_curso, t.ano_semestre_ingresso;

@@ -6,9 +6,9 @@ Trabalho da disciplina de Data Warehouse (UFPE), sobre o esquema do projeto, com
 
 O [painel interativo](dashboards/painel_academico_interativo.html) funciona offline no navegador e usa os dados sintéticos de `dados/csv`. Baixe o arquivo para abri-lo; o GitHub exibe apenas seu código.
 
-São quatro páginas: visão geral (C1–C3), desempenho acadêmico (C5, C6, C8, C12), permanência e equidade (C9–C11, C13) e turmas e docência (C4, C7). Há modo de foco por consulta, filtros globais e específicos, alternância gráfico/tabela, comparação semestral, investigação por disciplina e links que preservam o recorte, além de CSV e PDF.
+São quatro páginas, com a numeração do PDF da entrega: visão geral (C1, C6, C7), desempenho acadêmico (C4, C5, C9), permanência e equidade (C2, C3, C8, C11) e turmas e docência (C10, C12). Há modo de foco por consulta, filtros globais e específicos, alternância gráfico/tabela, comparação semestral, investigação por disciplina e links que preservam o recorte, além de CSV e PDF.
 
-Consulte a [prévia PDF](dashboards/previa_paineis.pdf) e as [instruções de reprodução e montagem no Metabase](dashboards/LEIA-ME.md). O HTML é um protótipo independente. O ambiente Docker e o importador do Metabase foram testados: criam quatro dashboards e 13 perguntas nativas. As instruções explicam como reproduzir essa configuração inicial e ajustar os filtros e gráficos no editor.
+Consulte a [prévia PDF](dashboards/previa_paineis.pdf) e as [instruções de reprodução e montagem no Metabase](dashboards/LEIA-ME.md). O HTML é um protótipo independente. O ambiente Docker e o importador do Metabase foram testados: criam quatro dashboards e 12 perguntas nativas. As instruções explicam como reproduzir essa configuração inicial e ajustar os filtros e gráficos no editor.
 
 ## Como rodar
 
@@ -16,7 +16,7 @@ Precisa de MySQL 8 e Python 3, sem bibliotecas extras.
 
 ```bash
 ./scripts/carregar.sh -uroot -p                     # cria o banco, gera os dados e valida
-mysql -uroot -p --table < sql/05_consultas.sql      # roda as 13 consultas
+mysql -uroot -p --table < sql/05_consultas.sql      # roda as 12 consultas
 python3 scripts/exportar_csv.py -uroot -p           # atualiza dados/csv
 ```
 
@@ -42,7 +42,7 @@ sudo dpkg --configure -a
 | `sql/02_dados_sinteticos.sql` | Dados gerados |
 | `sql/03_carga_fato_agregada.sql` | Deriva a fato agregada da fato por aluno |
 | `sql/04_views.sql` | Ponte entre professor e turma |
-| `sql/05_consultas.sql` | Consultas da entrega, C1 a C13 |
+| `sql/05_consultas.sql` | Consultas da entrega, C1 a C12 |
 | `sql/06_validacao.sql` | Testes, todos devem dar zero erros |
 | `gerador/gerar_dados.py` | Gerador dos dados |
 | `dados/csv/` | Tabelas em CSV para importar no painel |

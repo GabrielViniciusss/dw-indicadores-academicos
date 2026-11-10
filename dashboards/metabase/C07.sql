@@ -1,15 +1,21 @@
--- C7. Em uma mesma disciplina, qual e a relacao da aprovacao, da nota media e do numero de alunos com professores e turmas?
+-- C7. Como as matriculas nas disciplinas criticas se distribuem entre aprovacao por nota, aprovacao na final, reprovacao por nota, reprovacao por falta e trancamento?
 -- DADOS SINTÉTICOS; não representam a UFPE.
-SELECT di.nome_disciplina, d.ano_semestre, p.nome_professor, t.codigo_turma,
-       SUM(f.qtd_matriculados) AS alunos,
-       ROUND(100 * SUM(f.qtd_aprovacoes_nota + f.qtd_aprovacoes_final)
-             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0), 1) AS taxa_aprovacao,
-       ROUND(SUM(f.soma_notas_finais) / NULLIF(SUM(f.qtd_notas_validas), 0), 2) AS nota_media
+-- Percentuais sobre todas as matriculas, incluindo trancamentos: as cinco situacoes somam 100%.
+WITH criticas AS (
+  SELECT id_disciplina FROM fato_professor_disciplina GROUP BY id_disciplina
+  ORDER BY SUM(qtd_reprovacoes_nota + qtd_reprovacoes_faltas) / SUM(qtd_matriculados - qtd_trancamentos) DESC
+  LIMIT 10
+)
+SELECT d.ano_semestre, c.codigo_curso, di.nome_disciplina, SUM(f.qtd_matriculados) AS matriculas,
+       ROUND(100 * SUM(f.qtd_aprovacoes_nota) / SUM(f.qtd_matriculados), 1) AS aprovado_nota,
+       ROUND(100 * SUM(f.qtd_aprovacoes_final) / SUM(f.qtd_matriculados), 1) AS aprovado_final,
+       ROUND(100 * SUM(f.qtd_reprovacoes_nota) / SUM(f.qtd_matriculados), 1) AS reprovado_nota,
+       ROUND(100 * SUM(f.qtd_reprovacoes_faltas) / SUM(f.qtd_matriculados), 1) AS reprovado_falta,
+       ROUND(100 * SUM(f.qtd_trancamentos) / SUM(f.qtd_matriculados), 1) AS trancado
 FROM fato_professor_disciplina f
-JOIN vw_turma_professor tp ON tp.id_turma_disciplina = f.id_turma_disciplina
-JOIN dim_professor p ON p.id_professor = tp.id_professor
-JOIN dim_turma_disciplina t ON t.id_turma_disciplina = f.id_turma_disciplina
+JOIN criticas x ON x.id_disciplina = f.id_disciplina
 JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
 JOIN dim_data d ON d.id_data = f.id_data
-GROUP BY di.nome_disciplina, d.ano_semestre, p.nome_professor, t.codigo_turma
-ORDER BY di.nome_disciplina, d.ano_semestre, t.codigo_turma, p.nome_professor;
+JOIN dim_curso c ON c.id_curso = f.id_curso
+GROUP BY d.ano_semestre, c.codigo_curso, di.nome_disciplina
+ORDER BY d.ano_semestre, c.codigo_curso, di.nome_disciplina;

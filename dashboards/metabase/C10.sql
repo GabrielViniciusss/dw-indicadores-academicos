@@ -1,15 +1,28 @@
--- C10. Em cada turma de ingresso, como reprovacao e evasao variam entre tipos de cota e faixas economicas?
+-- C10. Quais turmas tiveram taxa de reprovacao muito acima ou abaixo do historico da mesma disciplina no curso?
 -- DADOS SINTÉTICOS; não representam a UFPE.
-SELECT c.codigo_curso, t.ano_semestre_ingresso, COALESCE(a.tipo_cota, 'Outras formas de ingresso') AS tipo_cota,
-       a.faixa_economica, COUNT(DISTINCT a.id_aluno) AS alunos,
-       ROUND(100 * SUM(f.situacao_final LIKE 'REPROVADO%')
-             / NULLIF(SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA'), 0), 1) AS taxa_reprovacao,
-       ROUND(100 * COUNT(DISTINCT CASE WHEN a.situacao_vinculo = 'EVADIDO' THEN a.id_aluno END)
-             / COUNT(DISTINCT a.id_aluno), 1) AS taxa_evasao
-FROM fato_professor_aluno f
-JOIN dim_aluno a ON a.id_aluno = f.id_aluno
-JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
-JOIN dim_curso c ON c.id_curso = t.id_curso
-WHERE t.ano_ingresso >= 2018
-GROUP BY c.codigo_curso, t.ano_semestre_ingresso, tipo_cota, a.faixa_economica
-ORDER BY c.codigo_curso, t.ano_semestre_ingresso, tipo_cota, a.faixa_economica;
+WITH oferta AS (
+  SELECT f.id_turma_disciplina, f.id_curso, f.id_disciplina, f.id_data,
+         f.qtd_matriculados - f.qtd_trancamentos AS matriculas,
+         f.qtd_reprovacoes_nota + f.qtd_reprovacoes_faltas AS reprovacoes
+  FROM fato_professor_disciplina f
+),
+comparada AS (
+  -- historico: semestres anteriores da mesma disciplina e curso, ponderado pelas matriculas
+  SELECT o.*,
+         (SELECT 100 * SUM(h.reprovacoes) / NULLIF(SUM(h.matriculas), 0)
+          FROM oferta h
+          WHERE h.id_curso = o.id_curso AND h.id_disciplina = o.id_disciplina AND h.id_data < o.id_data) AS taxa_historica
+  FROM oferta o
+  WHERE o.matriculas >= 10 -- turmas menores oscilam demais
+)
+SELECT d.ano_semestre, c.codigo_curso, di.nome_disciplina, t.codigo_turma, x.matriculas,
+       ROUND(100 * x.reprovacoes / x.matriculas, 1) AS taxa_reprovacao,
+       ROUND(x.taxa_historica, 1) AS taxa_historica,
+       ROUND(100 * x.reprovacoes / x.matriculas - x.taxa_historica, 1) AS diferenca_pontos
+FROM comparada x
+JOIN dim_turma_disciplina t ON t.id_turma_disciplina = x.id_turma_disciplina
+JOIN dim_disciplina di ON di.id_disciplina = x.id_disciplina
+JOIN dim_data d ON d.id_data = x.id_data
+JOIN dim_curso c ON c.id_curso = x.id_curso
+WHERE x.taxa_historica IS NOT NULL
+ORDER BY d.ano_semestre, c.codigo_curso, ABS(diferenca_pontos) DESC, di.nome_disciplina, t.codigo_turma;

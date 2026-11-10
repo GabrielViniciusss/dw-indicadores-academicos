@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Confere os cálculos JavaScript contra as 13 consultas SQL em SQLite em memória."""
+"""Confere os cálculos JavaScript contra as 12 consultas SQL em SQLite em memória."""
 import json
 import re
 import sqlite3
@@ -57,7 +57,7 @@ connection.row_factory = sqlite3.Row
 for name, rows in data.items():
     columns = list(rows[0])
     numeric = {key for r in rows for key, v in r.items() if isinstance(v, (float, int))}
-    types = {k: ('INTEGER' if k == 'qtd_tentativas' else 'REAL') if k in numeric else 'TEXT' for k in columns}
+    types = {k: ('INTEGER' if k in ('qtd_tentativas', 'periodo_aluno') else 'REAL') if k in numeric else 'TEXT' for k in columns}
     schema = ','.join(f'"{k}" {types[k]}' for k in columns)
     connection.execute(f'CREATE TABLE "{name}" ({schema})')
     connection.executemany(f'INSERT INTO "{name}" VALUES ({",".join("?" for _ in columns)})',
@@ -65,13 +65,10 @@ for name, rows in data.items():
 # O CSV da fato agregada traz contagens como strings: SQLite aplica afinidade REAL nas somas.
 actual = json.loads(subprocess.run(['node', str(HERE / 'validar_modelo.cjs')], input=json.dumps(data), text=True,
                                 capture_output=True, check=True, cwd=HERE).stdout)
-print('Modelo: filtros combinados, docente, períodos, cota/renda e comparação semestral com bases ausentes: OK.')
+print('Modelo: filtros combinados, docente, período, cota/renda, histórico de C10 e comparação semestral: OK.')
 sql = (ROOT / 'sql/05_consultas.sql').read_text()
 for number, body in re.findall(r'-- C(\d+)\. (.*?)(?=\n-- C\d+\.|\Z)', sql, re.S):
     query = body.split('\n', 1)[1].strip().replace('100 *', '100.0 *')
-    # ROW_NUMBER original não desempata taxas iguais. Usa ID para reproduzir a escolha do protótipo.
-    if number == '2':
-        query = query.replace('ORDER BY p.por_nota + p.por_falta DESC)', 'ORDER BY ROUND(p.por_nota + p.por_falta, 9) DESC, p.id_disciplina)')
     expected = [dict(r) for r in connection.execute(query)]
     result = actual['C'+number]
     assert len(result) == len(expected), (number, len(result), len(expected))

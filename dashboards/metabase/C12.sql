@@ -1,13 +1,15 @@
--- C12. Em cada disciplina, como a taxa de aprovacao muda da 1a para a 2a tentativa, e para a 3a ou mais?
+-- C12. Na mesma disciplina e semestre, como variam aprovacao, nota media e tamanho das turmas associadas a diferentes professores?
 -- DADOS SINTÉTICOS; não representam a UFPE.
-SELECT di.nome_disciplina, c.codigo_curso, d.ano_semestre,
-       CASE WHEN f.qtd_tentativas >= 3 THEN '3 ou mais' ELSE CAST(f.qtd_tentativas AS CHAR) END AS tentativa,
-       COUNT(*) AS matriculas,
-       ROUND(100 * SUM(f.situacao_final LIKE 'APROVADO%')
-             / NULLIF(SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA'), 0), 1) AS taxa_aprovacao
-FROM fato_professor_aluno f
+SELECT di.nome_disciplina, d.ano_semestre, p.nome_professor, t.codigo_turma,
+       SUM(f.qtd_matriculados) AS alunos,
+       ROUND(100 * SUM(f.qtd_aprovacoes_nota + f.qtd_aprovacoes_final)
+             / NULLIF(SUM(f.qtd_matriculados - f.qtd_trancamentos), 0), 1) AS taxa_aprovacao,
+       ROUND(SUM(f.soma_notas_finais) / NULLIF(SUM(f.qtd_notas_validas), 0), 2) AS nota_media
+FROM fato_professor_disciplina f
+JOIN vw_turma_professor tp ON tp.id_turma_disciplina = f.id_turma_disciplina
+JOIN dim_professor p ON p.id_professor = tp.id_professor
+JOIN dim_turma_disciplina t ON t.id_turma_disciplina = f.id_turma_disciplina
 JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
-JOIN dim_curso c ON c.id_curso = f.id_curso
 JOIN dim_data d ON d.id_data = f.id_data
-GROUP BY di.nome_disciplina, c.codigo_curso, d.ano_semestre, tentativa
-ORDER BY di.nome_disciplina, c.codigo_curso, d.ano_semestre, tentativa;
+GROUP BY di.nome_disciplina, d.ano_semestre, p.nome_professor, t.codigo_turma
+ORDER BY di.nome_disciplina, d.ano_semestre, t.codigo_turma, p.nome_professor;

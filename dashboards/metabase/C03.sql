@@ -1,19 +1,12 @@
--- C3. Em cada semestre, como as matriculas das disciplinas criticas se dividem entre as situacoes?
+-- C3. Entre alunos matriculados em disciplinas, como a taxa de reprovacao de beneficiarios da assistencia estudantil se compara a de nao beneficiarios ao longo dos semestres?
 -- DADOS SINTÉTICOS; não representam a UFPE.
-WITH criticas AS (
-  SELECT id_disciplina FROM fato_professor_disciplina GROUP BY id_disciplina
-  ORDER BY SUM(qtd_reprovacoes_nota + qtd_reprovacoes_faltas) / SUM(qtd_matriculados - qtd_trancamentos) DESC
-  LIMIT 10
-)
-SELECT d.ano_semestre, di.nome_disciplina,
-       ROUND(100 * SUM(f.qtd_aprovacoes_nota) / SUM(f.qtd_matriculados), 1) AS aprovado_nota,
-       ROUND(100 * SUM(f.qtd_aprovacoes_final) / SUM(f.qtd_matriculados), 1) AS aprovado_final,
-       ROUND(100 * SUM(f.qtd_reprovacoes_nota) / SUM(f.qtd_matriculados), 1) AS reprovado_nota,
-       ROUND(100 * SUM(f.qtd_reprovacoes_faltas) / SUM(f.qtd_matriculados), 1) AS reprovado_falta,
-       ROUND(100 * SUM(f.qtd_trancamentos) / SUM(f.qtd_matriculados), 1) AS trancado
-FROM fato_professor_disciplina f
-JOIN criticas x ON x.id_disciplina = f.id_disciplina
-JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
+SELECT c.codigo_curso, d.ano_semestre,
+       CASE WHEN f.bolsista_no_semestre = 1 THEN 'Beneficiario' ELSE 'Nao beneficiario' END AS grupo,
+       SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA') AS matriculas,
+       ROUND(100 * SUM(f.situacao_final LIKE 'REPROVADO%')
+             / NULLIF(SUM(f.situacao_final <> 'TRANCADO_DISCIPLINA'), 0), 1) AS taxa_reprovacao
+FROM fato_professor_aluno f
+JOIN dim_curso c ON c.id_curso = f.id_curso
 JOIN dim_data d ON d.id_data = f.id_data
-GROUP BY d.ano_semestre, di.nome_disciplina
-ORDER BY d.ano_semestre, di.nome_disciplina;
+GROUP BY c.codigo_curso, d.ano_semestre, grupo
+ORDER BY c.codigo_curso, d.ano_semestre, grupo;
