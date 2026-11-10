@@ -1,4 +1,4 @@
--- Esquemas PDFs e PDFs 2 unificados, com dimensoes conformadas.
+-- Um esquema com duas estrelas e dimensoes compartilhadas (docs/dbml/v2_esquema.dbml).
 -- [AJUSTE] marca o que foi acrescentado em relacao aos diagramas do DrawSQL.
 DROP DATABASE IF EXISTS dw_academico;
 CREATE DATABASE dw_academico CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
@@ -29,7 +29,7 @@ CREATE TABLE dim_disciplina (
   creditos INT
 );
 
--- [AJUSTE] periodo curricular da disciplina em cada curso, base da consulta C5
+-- [AJUSTE] periodo curricular da disciplina em cada curso; usado pelo gerador e pela validacao, sem consulta atual
 CREATE TABLE curso_disciplina (
   id_curso BIGINT NOT NULL,
   id_disciplina BIGINT NOT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE fato_professor_aluno (
   ch_adquirida INT NOT NULL,
   bolsista_no_semestre BOOLEAN,
   qtd_tentativas INT NOT NULL,
-  periodo_aluno SMALLINT NOT NULL, -- [AJUSTE] semestres desde o ingresso, base da consulta C8
+  periodo_aluno SMALLINT NOT NULL, -- [AJUSTE] semestres desde o ingresso, base da consulta C4
   UNIQUE KEY uq_matricula (id_aluno, id_turma_disciplina, id_curso),
   FOREIGN KEY (id_aluno) REFERENCES dim_aluno (id_aluno),
   FOREIGN KEY (id_turma_disciplina) REFERENCES dim_turma_disciplina (id_turma_disciplina),

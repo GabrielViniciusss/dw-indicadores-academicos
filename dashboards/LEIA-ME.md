@@ -1,8 +1,8 @@
-# Visualização dos dados — aula de 05/11/2026
+# Visualização dos dados (aula de 05/11/2026)
 
-Abra [`painel_academico_interativo.html`](painel_academico_interativo.html) no navegador. Funciona por arquivo local e sem internet, servidor ou instalação. No GitHub, baixe o HTML antes de abrir: a visualização de código não executa os painéis.
+A versão publicada está em https://painel-dw-academico.vercel.app. Para usar offline, abra [`painel_academico_interativo.html`](painel_academico_interativo.html) no navegador. Funciona por arquivo local e sem internet, servidor ou instalação. No GitHub, baixe o HTML antes de abrir: a visualização de código não executa os painéis.
 
-A [`prévia PDF`](previa_paineis.pdf) apresenta os quatro painéis em quatro páginas, sem filtros. É uma versão resumida: limita as categorias de alguns gráficos conforme indicado no topo de cada página. O HTML e seus CSVs mantêm todos os resultados. Todos os valores são calculados sobre os CSVs sintéticos já existentes no DW: **não representam indicadores reais da UFPE**. Os gráficos ilustrativos antigos em `docs/graficos` não são a fonte destes painéis.
+A [`prévia PDF`](previa_paineis.pdf) apresenta os quatro painéis em quatro páginas, sem filtros. É uma versão resumida: limita as categorias de alguns gráficos conforme indicado no topo de cada página. O HTML e seus CSVs mantêm todos os resultados. Todos os valores são calculados sobre os CSVs sintéticos já existentes no DW: **não representam indicadores reais da UFPE**.
 
 ## Organização
 
