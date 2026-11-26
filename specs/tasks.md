@@ -44,7 +44,7 @@ Nenhuma tarefa desta fase muda um número já apresentado.
   - `sql/01_ddl.sql`: tabela nova; `sql/07_snapshot_vinculo.sql`: derivação; `scripts/carregar.sh`:
     executar o novo arquivo na sequência; `scripts/exportar_csv.py`: incluir a tabela.
   - `sql/06_validacao.sql`: as duas regras de aceitação de R1.
-  - Confere: no último semestre, 381 ativos, 433 concluídos e 619 evadidos; nenhuma linha antes do
+  - Confere: no último semestre, 412 ativos, 372 concluídos e 660 evadidos; nenhuma linha antes do
     ingresso.
 
 - [ ] **T1.5 Consulta de retenção sobre o snapshot**

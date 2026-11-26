@@ -22,9 +22,9 @@ e define requisitos verificáveis para o próximo ciclo.
 | Camada | Estado |
 | --- | --- |
 | Modelo | Um banco, `dw_academico`, com duas estrelas e cinco dimensões compartilhadas |
-| Grão da fato individual | `fato_professor_aluno`: 1 linha por aluno × oferta × curso — 30.992 linhas |
-| Grão da fato agregada | `fato_professor_disciplina`: 1 linha por oferta × curso — 2.211 linhas, derivada da primeira em SQL |
-| Dimensões | `dim_data` (16 semestres), `dim_curso` (3), `dim_disciplina` (42), `dim_professor` (40), `dim_turma_disciplina` (875), `dim_turma_aluno` (72 coortes), `dim_aluno` (1.433) |
+| Grão da fato individual | `fato_professor_aluno`: 1 linha por aluno × oferta × curso — 29.474 linhas |
+| Grão da fato agregada | `fato_professor_disciplina`: 1 linha por oferta × curso — 2.140 linhas, derivada da primeira em SQL |
+| Dimensões | `dim_data` (16 semestres), `dim_curso` (3), `dim_disciplina` (42), `dim_professor` (40), `dim_turma_disciplina` (848), `dim_turma_aluno` (72 coortes), `dim_aluno` (1.444) |
 | Ponte | View `vw_turma_professor`, com `peso = 1/n` por oferta |
 | Matriz curricular | Tabela `curso_disciplina`, com `periodo_curricular` |
 | Carga | `gerador/gerar_dados.py` (semente fixa) → DDL → dados → derivação da agregada → views |
@@ -77,8 +77,11 @@ Nenhum requisito abaixo pode quebrar o que já está entregue:
 
 1. As duas estrelas continuam fechando: matrículas, soma de notas e soma de faltas idênticas.
 2. Os 16 testes atuais continuam retornando zero erros, e nenhum é removido.
-3. As 12 consultas C1–C12 continuam devolvendo os mesmos resultados, linha a linha, salvo onde um
-   requisito mudar o indicador de propósito (apenas R6).
+3. As 12 consultas C1–C12 continuam devolvendo os mesmos resultados, linha a linha, **para a mesma
+   população**, salvo onde um requisito mudar o indicador de propósito (apenas R6). A correção do
+   gerador (`60d6269`) é a única exceção já consumada, e é de dado, não de consulta: nenhuma linha de
+   SQL mudou e todo número mudou. O quanto mudou está medido em
+   [`planejamento.md`](planejamento.md), seção 4.1.
 4. `dashboards/validar.py` continua passando.
 5. A semente do gerador continua fixa, e a reprodução continua sendo `./scripts/carregar.sh`.
 6. Nenhum número passa a descrever a UFPE.
@@ -96,8 +99,8 @@ naquele semestre. Derivada em SQL de `dim_aluno` e `dim_turma_aluno`, sem mexer 
 Aceitação:
 - Uma consulta devolve, para cada coorte e cada semestre, quantos estavam ATIVO, CONCLUIDO e EVADIDO
   naquele ponto do tempo.
-- No último semestre da base, as contagens coincidem com as de `dim_aluno` (381 ativos, 433
-  concluídos, 619 evadidos).
+- No último semestre da base, as contagens coincidem com as de `dim_aluno` (412 ativos, 372
+  concluídos, 660 evadidos).
 - Nenhum aluno aparece antes do semestre de ingresso.
 - Um teste novo em `06_validacao.sql` confere as duas regras acima.
 

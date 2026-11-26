@@ -24,8 +24,10 @@ O que mudou nesta branch (`calibracao-taxas`):
 | `b283c32` | `specs/` — o SDD: 13 lacunas com evidência, 11 requisitos, 9 decisões, 24 tarefas |
 | `60d6269` | Correção do gerador (seção 4 deste documento) + `gerador/calibrar.py` + SQL regerado |
 
-**Estado parcial, e isso bloqueia o resto:** `sql/02_dados_sinteticos.sql` já é o dado novo, mas
-`dados/csv/`, o painel HTML e os SQLs do Metabase ainda são o dado antigo. Ver frente F1.
+**Propagação concluída em 23/11/2026 (F1 feito):** `dados/csv/` e o painel HTML foram regerados a
+partir do dado novo e agora batem com `sql/02_dados_sinteticos.sql`. Os SQLs em
+`dashboards/metabase/` não continham dado nenhum — são só as consultas, e ficaram idênticos. O que
+ainda carrega número velho é o `docs/entrega_05_11.pdf`, que é binário e precisa ser refeito (F5).
 
 ---
 
@@ -165,6 +167,62 @@ matriz/prazo formar-se no prazo exige quase nenhuma reprovação e o gerador nã
 recuperação** — alunos reais pegam disciplinas extras para recuperar atraso. Subir a carga esconderia
 isso com outra constante inventada. Ver frente F6.
 
+### 4.1 O que mudou e o que não quebrou, medido
+
+Medido em 23/11/2026 carregando as duas populações em paralelo no mesmo MySQL 8 (`dw_antigo`, a de
+05/11, e `dw_academico`, a corrigida) e rodando as mesmas 12 consultas nas duas.
+
+**O que não mudou: a estrutura inteira.** `git diff 60d6269^ HEAD` é vazio em `sql/01_ddl.sql`,
+`sql/03_carga_fato_agregada.sql`, `sql/04_views.sql`, `sql/05_consultas.sql`, `sql/06_validacao.sql`
+e `dashboards/painel.js`. O commit tocou só o gerador, o `calibrar.py` e o SQL de dados. Esquema,
+consultas, testes e cálculos do painel são os mesmos da entrega, e continuam passando: 16 testes com
+zero erros e `validar.py` conferindo C1–C12.
+
+**O que mudou nos agregados** — pouco, o discurso da entrega sobrevive:
+
+| Indicador, sobre toda a base | Antes | Depois | Δ |
+| --- | ---: | ---: | ---: |
+| Taxa de aprovação | 76,16% | 77,40% | +1,2 |
+| Taxa de reprovação | 23,84% | 22,60% | −1,2 |
+| Taxa de trancamento | 4,04% | 3,99% | −0,1 |
+| Nota média | 6,29 | 6,36 | +0,07 |
+| Evasão, vínculo final | 43,20% | 45,71% | +2,5 |
+| Conclusão | 30,22% | 25,76% | −4,5 |
+| Ativos | 26,59% | 28,53% | +1,9 |
+| **TAP em coortes de 2018 ou antes** | **1,01%** | **0,00%** | **−1,0** |
+
+A última linha é a correção, não um efeito colateral: coorte fechada com aluno ativo é o que impedia
+`TAP + TCA + TDA = 100%`. Atenção à base: estes números são sobre a base inteira, incluindo coortes
+recentes ainda em curso. Os ~53% → 64% de desistência citados acima são a métrica do `calibrar.py`,
+com censura de coorte — bases diferentes, não números conflitantes.
+
+**O que mudou linha a linha** — muito, e é aqui que o PDF fica inservível:
+
+| Consulta | Linhas antes | Depois | Chaves só antes | Só depois | Maior variação numa célula |
+| --- | ---: | ---: | ---: | ---: | --- |
+| C1 | 480 | 480 | 6 | 15 | reprovação por nota, 38,6 pontos |
+| C2 | 48 | 48 | 0 | 0 | evadidos, 20 alunos |
+| C3 | 96 | 96 | 0 | 0 | matrículas, 45 |
+| C4 | 630 | 607 | 0 | 0 | reprovação por nota, 22 pontos |
+| C5 | 104 | 104 | 0 | 0 | alunos, 56 |
+| C6 | 655 | 616 | 4 | 1 | taxa de aprovação, 100 pontos |
+| C7 | 368 | 352 | 2 | 1 | aprovado final, 30 pontos |
+| C8 | 581 | 581 | 0 | 0 | taxa de evasão, 100 pontos |
+| C9 | 2.211 | 2.140 | 9 | 0 | taxa de reprovação, 100 pontos |
+| C10 | 1.566 | 1.516 | 0 | 2 | diferença em pontos, 41,2 |
+| C11 | 24 | 23 | 0 | 0 | média de semestres, 2,0 |
+| C12 | 1.126 | 1.051 | 7 | 0 | taxa de aprovação, 100 pontos |
+
+Como ler: as variações de 100 pontos são células de denominador minúsculo — oferta com um punhado de
+matrículas, onde um aluno vira a taxa inteira. As colunas "chaves só antes/só depois" são ofertas,
+turmas ou pares que deixaram de existir ou passaram a existir, porque as turmas caíram de 875 para
+848. **Consequência prática:** nenhuma frase do PDF ou do roteiro que cite um número específico de
+uma disciplina, turma ou semestre continua válida; as afirmações sobre o nível geral continuam.
+
+**Isso contradiz o invariante 3 da `spec.md`**, que exigia C1–C12 idênticas linha a linha. O
+invariante foi reescrito para dizer a verdade: ele vale para a mesma população, e a correção do
+gerador é a exceção já consumada, de dado e não de consulta.
+
 ---
 
 ## 5. As consultas: o que temos e o que falta
@@ -232,19 +290,41 @@ Usamos e nunca nomeamos:
 
 Seis frentes. Cada uma tem um dono a definir, o que a bloqueia, e como se sabe que acabou.
 
-### F1 — Propagar a correção no banco · BLOQUEIA F2, F3, F5
+### F1 — Propagar a correção no banco · FEITO em 23/11/2026 · não bloqueia mais nada
 
-Quem tiver MySQL 8 local com senha. Rodar, na raiz:
+O gargalo era a senha do MySQL da máquina, que usa `auth_socket` e exige `sudo`. Resolvido sem ela,
+com um MySQL 8 em contêiner isolado — o mesmo recurso que `dashboards/metabase/compose.yaml` já usa:
 
 ```bash
-./scripts/carregar.sh -uroot -p
-python3 scripts/exportar_csv.py -uroot -p
+docker run -d --name dw-f1-mysql -e MYSQL_ROOT_PASSWORD=<senha> \
+  -p 127.0.0.1:3310:3306 mysql:8.0
+export MYSQL_PWD=<senha>                                   # evita a senha no comando
+./scripts/carregar.sh      -h127.0.0.1 -P3310 --protocol=TCP -uroot
+python3 scripts/exportar_csv.py -h127.0.0.1 -P3310 --protocol=TCP -uroot
 python3 dashboards/build_demo.py
 python3 dashboards/validar.py
+docker rm -f dw-f1-mysql                                   # o contêiner é descartável
 ```
 
-Pronto quando: os 16 testes dão zero erros, `validar.py` passa, e `dados/csv/`, o painel e os SQLs do
-Metabase refletem os 29.474 registros novos. Se algum teste falhar, reportar no grupo antes de seguir.
+Como os scripts repassam os argumentos direto ao cliente `mysql`, apontar para outra porta não exigiu
+mudar uma linha de código. Resultado:
+
+| Verificação | Resultado |
+| --- | --- |
+| `gerador/gerar_dados.py` reexecutado | Reproduz o SQL commitado byte a byte (semente fixa confirmada) |
+| 16 testes de `06_validacao.sql` | Zero erros, todos |
+| `dashboards/validar.py` | Passa; C1–C12 conferem, de 23 a 2.140 linhas por consulta |
+| `sql/05_consultas.sql` no MySQL 8 | As 12 executam sem erro no dado novo |
+| `TAP + TCA + TDA = 100%` por coorte fechada | Confere em todas, com `TAP = 0,0%` — agora medido no banco, não só em memória |
+| Volumetria propagada | 1.444 alunos, 848 turmas, 29.474 matrículas, 2.140 ofertas, 1.051 linhas de ponte |
+
+Arquivos que mudaram: os cinco CSVs com dado (`dim_aluno`, `dim_turma_disciplina`,
+`fato_professor_aluno`, `fato_professor_disciplina`, `vw_turma_professor`) e
+`dashboards/painel_academico_interativo.html`.
+
+Dívida de número que isso expôs e já foi quitada no mesmo passo: a volumetria da linha de base em
+`spec.md`, os critérios de aceitação de R1 e T1.4 (eram 381/433/619, hoje **412 ativos, 372
+concluídos, 660 evadidos**), `dashboards/dados_sinteticos/README.md` e `docs/apresentacao.md`.
 
 ### F2 — Duas consultas novas, sem tocar no esquema · depende de F1
 
@@ -296,8 +376,9 @@ F1 (banco) ──┬── F2 (TSG, C13) ──┐                              
                                      F6 (opcional, depois)
 ```
 
-F1 é o gargalo e depende de uma senha de MySQL que ninguém fora do dono da máquina tem. **Quem tem
-MySQL local assume F1 hoje.** F4 roda em paralelo desde já e não espera ninguém.
+**F1 está feito**, então o gargalo acabou: F2, F3 e F4 podem correr em paralelo desde já, cada uma com
+um dono diferente, e só F5 espera (F2 e F3). Quem pegar F2 ou F3 precisa de um MySQL 8 — o contêiner
+descartável da seção F1 resolve, não é preciso ter senha de banco na máquina.
 
 ---
 
