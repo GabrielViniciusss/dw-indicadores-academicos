@@ -40,20 +40,20 @@ Nenhuma tarefa desta fase muda um número já apresentado.
   - Confere: `grep -E "LIKE '(RE|A)PROVADO|TRANCADO_DISCIPLINA'" sql/05_consultas.sql` não retorna
     nada, e `validar.py` passa com os mesmos resultados.
 
-- [ ] **T1.4 `fato_vinculo_semestre`** (R1, D1)
+- [x] **T1.4 `fato_vinculo_semestre`** (R1, D1) — feito para o relatório final; 3 testes novos (19 no total)
   - `sql/01_ddl.sql`: tabela nova; `sql/07_snapshot_vinculo.sql`: derivação; `scripts/carregar.sh`:
     executar o novo arquivo na sequência; `scripts/exportar_csv.py`: incluir a tabela.
   - `sql/06_validacao.sql`: as duas regras de aceitação de R1.
-  - Confere: no último semestre, 412 ativos, 372 concluídos e 660 evadidos; nenhuma linha antes do
-    ingresso.
+  - Confere: 412 ativos no último semestre; 372 conclusões e 660 evasões na soma dos fluxos; nenhuma
+    linha antes do ingresso nem depois da saída.
 
-- [ ] **T1.5 Consulta de retenção sobre o snapshot**
+- [x] **T1.5 Consulta de retenção sobre o snapshot** — entrou como C15 (TAP, TCA e TDA por turma de ingresso e ano)
   - Primeira consulta que o snapshot viabiliza: situação da coorte semestre a semestre, em barras
     empilhadas em 100% por período desde o ingresso. É a resposta a "qual era a evasão em 2021.2".
   - Decidir se entra como C14 na numeração da entrega ou como consulta de demonstração fora da lista.
     Ver T0.2.
 
-- [ ] **T1.6 C13, atraso curricular** (R3, D3)
+- [x] **T1.6 C13, atraso curricular** (R3, D3) — feito; a TSG entrou junto como C14
   - `sql/05_consultas.sql`, `dashboards/painel.js`, `dashboards/exploracao.js` se houver investigação,
     `dashboards/validar.py`, e `dashboards/metabase/C13.sql` via `build_demo.py`.
   - Cartão com "Como interpretar" distinguindo `periodo_aluno` de `periodo_curricular` e avisando que

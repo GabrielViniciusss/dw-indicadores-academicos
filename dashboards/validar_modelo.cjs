@@ -27,6 +27,14 @@ process.stdin.on('end',()=>{
  // Vínculo final não é filtrado por semestre da matrícula nem por disciplina.
  assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C2,baseline.queries.C2);
  assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C11,baseline.queries.C11);
+ // C14 e C15 são indicadores de vínculo: filtros de matrícula não os alteram; C14 também ignora a turma de ingresso.
+ assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C14,baseline.queries.C14);
+ assert.deepEqual(model.compute({semestre:'20252',disciplina:'1'}).queries.C15,baseline.queries.C15);
+ assert.ok(baseline.queries.C15.length>0&&baseline.queries.C15.every(row=>Math.abs(row.tap+row.tca+row.tda-100)<1e-9));
+ assert.deepEqual(model.compute({semestre:'20252',disciplina:'1',coorte:'2019.1'}).queries.C16,baseline.queries.C16);
+ // C16: a diferença entre a fórmula e a coorte é exatamente calouros evadidos / veteranos.
+ assert.ok(baseline.queries.C16.length>0&&baseline.queries.C16.every(row=>Math.abs(row.diferenca_pontos-100*row.evadidos_calouros/row.base_veteranos)<1e-9));
+ assert.deepEqual(model.compute({coorte:'2019.1'}).queries.C15,baseline.queries.C15.filter(row=>row.ano_semestre_ingresso==='2019.1'));
  // O histórico de C10 vem da base completa: filtrar o semestre não muda a comparação.
  assert.deepEqual(model.compute({semestre:'20252'}).queries.C10,baseline.queries.C10.filter(row=>row.ano_semestre==='2025.2'));
  const comparison=model.compareSemesters({curso:'1',semestre:'20252'});

@@ -2,7 +2,7 @@
 
 Comparação entre os diagramas [PDFs](https://drawsql.app/teams/maria-fernanda-fa/diagrams/pdfs) e [PDFs 2](https://drawsql.app/teams/maria-fernanda-fa/diagrams/pdfs-2), lidos em 02/11/2026, e o arquivo `sql/01_ddl.sql`.
 
-O projeto agora tem um único esquema, em `docs/dbml/v2_esquema.dbml`, com as duas estrelas juntas. Os diagramas antigos, separados, estão em `docs/dbml/v1_esquema1` e `v1_esquema2`. O diagrama `docs/dbml/v2_esquema.pdf` ainda não mostra a tabela `curso_disciplina`; o DBML e o DDL têm a tabela.
+O projeto agora tem um único esquema, em `docs/dbml/v2_esquema.dbml`, com as duas estrelas juntas. Os diagramas antigos, separados, estão em `docs/dbml/v1_esquema1` e `v1_esquema2`. O diagrama `docs/dbml/v2_esquema.pdf` é gerado do DBML por `node scripts/gerar_relatorio.mjs diagrama`, que antes confere se toda tabela e coluna do DDL está no DBML.
 
 ## Resumo
 
@@ -85,3 +85,37 @@ A definição da view está em `sql/04_views.sql`.
 ## Unificação dos dois diagramas
 
 No DrawSQL, as duas estrelas estão em diagramas separados. No SQL, elas ficam no mesmo banco, `dw_academico`, e compartilham `dim_data`, `dim_curso`, `dim_disciplina`, `dim_professor` e `dim_turma_disciplina`. Isso não muda a modelagem: essas tabelas já tinham a mesma estrutura nos dois diagramas.
+
+## Relatório final (novembro de 2026)
+
+| # | Onde | Mudança | Consultas |
+| --- | --- | --- | --- |
+| 8 | Banco | Nova tabela `fato_vinculo_semestre`, snapshot periódico do vínculo, derivada de `dim_aluno` por `sql/07_snapshot_vinculo.sql` | C15 |
+| 9 | Consultas | C13 passa a ler `curso_disciplina.periodo_curricular`, que antes só era usada na validação | C13 |
+| 10 | Consultas | C14 usa `dim_curso.semestres_previstos` como prazo da Taxa de Sucesso na Graduação | C14 |
+| 11 | Validação | Três testes do snapshot: janela de vínculo, coerência com `dim_aluno` e TAP + TCA + TDA = 100% por turma e ano | — |
+| 12 | Consultas e validação | C16 compara a evasão pela fórmula do Instituto Lobo com a coorte; um teste confere que o denominador da fórmula, calculado pelo snapshot, é igual aos veteranos em risco de `dim_aluno` | C16 |
+
+Nenhuma tabela ou coluna existente mudou, e C1 a C12 devolvem os mesmos resultados. O snapshot não substitui `dim_aluno`: a dimensão continua com o retrato final do vínculo (SCD Tipo 1), e o snapshot guarda a história semestre a semestre. A justificativa de não usar SCD Tipo 2 está no relatório final, seção 3.3.
+
+```sql
+CREATE TABLE fato_vinculo_semestre (
+  id_vinculo_semestre BIGINT PRIMARY KEY,
+  id_aluno BIGINT NOT NULL,
+  id_turma_aluno BIGINT NOT NULL,
+  id_curso BIGINT NOT NULL,
+  id_data BIGINT NOT NULL,
+  situacao_vinculo VARCHAR(20) NOT NULL,
+  periodo_aluno SMALLINT NOT NULL,
+  qtd_ativo TINYINT NOT NULL,
+  qtd_concluiu TINYINT NOT NULL,
+  qtd_evadiu TINYINT NOT NULL,
+  UNIQUE KEY uq_aluno_semestre (id_aluno, id_data),
+  FOREIGN KEY (id_aluno) REFERENCES dim_aluno (id_aluno),
+  FOREIGN KEY (id_turma_aluno) REFERENCES dim_turma_aluno (id_turma_aluno),
+  FOREIGN KEY (id_curso) REFERENCES dim_curso (id_curso),
+  FOREIGN KEY (id_data) REFERENCES dim_data (id_data)
+);
+```
+
+O diagrama `docs/dbml/v2_esquema.pdf` foi refeito a partir do DBML e já mostra a tabela nova e `curso_disciplina`. Ele substitui a exportação do DrawSQL.

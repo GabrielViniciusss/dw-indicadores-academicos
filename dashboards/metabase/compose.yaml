@@ -14,6 +14,7 @@ services:
       - ../../sql/02_dados_sinteticos.sql:/docker-entrypoint-initdb.d/02_dados_sinteticos.sql:ro
       - ../../sql/03_carga_fato_agregada.sql:/docker-entrypoint-initdb.d/03_carga_fato_agregada.sql:ro
       - ../../sql/04_views.sql:/docker-entrypoint-initdb.d/04_views.sql:ro
+      - ../../sql/07_snapshot_vinculo.sql:/docker-entrypoint-initdb.d/07_snapshot_vinculo.sql:ro
     healthcheck:
       test: [CMD, mysqladmin, ping, -h, localhost]
       interval: 10s

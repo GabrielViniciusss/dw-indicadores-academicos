@@ -1,4 +1,4 @@
-// Projeto completo: as duas estrelas no mesmo esquema. [AJUSTE] marca o que foi acrescentado aos diagramas originais.
+// Projeto completo: as duas estrelas e o snapshot do vinculo no mesmo esquema. [AJUSTE] marca o que foi acrescentado aos diagramas originais.
 Project dw_academico {
   database_type: 'MySQL'
 }
@@ -148,6 +148,25 @@ Table fato_professor_disciplina {
   Note: 'GRAO: uma linha para cada oferta de disciplina x curso dos alunos x semestre. FatoRendimentoDisciplina agregada, SEM aluno individual.'
 }
 
+Table fato_vinculo_semestre {
+  id_vinculo_semestre bigint [pk]
+  id_aluno bigint [not null, ref: > dim_aluno.id_aluno]
+  id_turma_aluno bigint [not null, ref: > dim_turma_aluno.id_turma_aluno]
+  id_curso bigint [not null, ref: > dim_curso.id_curso]
+  id_data bigint [not null, ref: > dim_data.id_data]
+  situacao_vinculo varchar(20) [not null, note: 'Situacao naquele semestre: ATIVO, CONCLUIDO ou EVADIDO']
+  periodo_aluno smallint [not null, note: 'Semestres desde o ingresso']
+  qtd_ativo tinyint [not null, note: 'Estoque: semi-aditiva, nao soma ao longo do tempo']
+  qtd_concluiu tinyint [not null, note: 'Fluxo: 1 so no semestre da conclusao']
+  qtd_evadiu tinyint [not null, note: 'Fluxo: 1 so no semestre da evasao']
+
+  indexes {
+    (id_aluno, id_data) [unique]
+  }
+
+  Note: '[AJUSTE] Snapshot periodico derivado de dim_aluno (sql/07_snapshot_vinculo.sql). GRAO: 1 linha por aluno x semestre, do ingresso (ou 2018.1) ate a saida, inclusive.'
+}
+
 TableGroup dimensoes_compartilhadas {
   dim_data
   dim_curso
@@ -155,14 +174,18 @@ TableGroup dimensoes_compartilhadas {
   curso_disciplina
   dim_professor
   dim_turma_disciplina
-}
-
-TableGroup estrela_por_aluno {
-  fato_professor_aluno
   dim_aluno
   dim_turma_aluno
 }
 
+TableGroup estrela_por_aluno {
+  fato_professor_aluno
+}
+
 TableGroup estrela_agregada {
   fato_professor_disciplina
+}
+
+TableGroup snapshot_vinculo {
+  fato_vinculo_semestre
 }

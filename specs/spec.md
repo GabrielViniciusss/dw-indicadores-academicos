@@ -99,8 +99,10 @@ naquele semestre. Derivada em SQL de `dim_aluno` e `dim_turma_aluno`, sem mexer 
 Aceitação:
 - Uma consulta devolve, para cada coorte e cada semestre, quantos estavam ATIVO, CONCLUIDO e EVADIDO
   naquele ponto do tempo.
-- No último semestre da base, as contagens coincidem com as de `dim_aluno` (412 ativos, 372
-  concluídos, 660 evadidos).
+- As contagens coincidem com as de `dim_aluno`: 412 ativos no último semestre da base, e 372
+  conclusões e 660 evasões somando os semestres de saída. (O grão implementado vai do ingresso até o
+  semestre da saída, inclusive; por isso as saídas se conferem pela soma dos fluxos, e não pelo
+  último semestre.)
 - Nenhum aluno aparece antes do semestre de ingresso.
 - Um teste novo em `06_validacao.sql` confere as duas regras acima.
 

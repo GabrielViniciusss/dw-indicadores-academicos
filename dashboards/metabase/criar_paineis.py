@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cria uma coleção nova, 12 perguntas e quatro dashboards pela API do Metabase.
+"""Cria uma coleção nova, 16 perguntas e cinco dashboards pela API do Metabase.
 Não configura usuários nem altera perguntas preexistentes. Reexecutar cria outra coleção.
 """
 import argparse
@@ -15,6 +15,7 @@ PANELS = [
     ('2. Desempenho acadêmico', [4, 5, 9]),
     ('3. Permanência e equidade', [2, 3, 8, 11]),
     ('4. Turmas e docência', [10, 12]),
+    ('5. Trajetória e indicadores INEP', [13, 14, 15, 16]),
 ]
 # Primeira configuração de gráficos. As dimensões do SQL permanecem na pergunta.
 CHARTS = {
@@ -30,6 +31,10 @@ CHARTS = {
     10: ('row', ['nome_disciplina', 'codigo_turma'], ['diferenca_pontos']),
     11: ('bar', ['ano_semestre_ingresso', 'codigo_curso'], ['media_semestres', 'semestres_previstos']),
     12: ('table', [], []),
+    13: ('table', [], []),  # mapa de calor período x semestre: tabela dinâmica no Metabase
+    14: ('line', ['ano', 'codigo_curso'], ['tsg']),
+    15: ('bar', ['ano', 'codigo_curso'], ['tca', 'tap', 'tda']),
+    16: ('line', ['ano', 'codigo_curso'], ['evasao_lobo', 'evasao_coorte']),
 }
 
 
@@ -72,7 +77,7 @@ def main():
                 title = sql.splitlines()[0].removeprefix('-- ')
                 display, dimensions, metrics = CHARTS[number]
                 settings = {'graph.dimensions': dimensions, 'graph.metrics': metrics} if dimensions else {}
-                if number in (1, 2, 4, 7):
+                if number in (1, 2, 4, 7, 15):
                     settings['stackable.stack_type'] = 'stacked'
                 card = api('POST', '/card', {'name': title, 'collection_id': collection['id'],
                            'type': 'question', 'display': display, 'visualization_settings': settings,
