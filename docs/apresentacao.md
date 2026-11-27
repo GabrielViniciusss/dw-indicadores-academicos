@@ -63,7 +63,7 @@ Roteiro para quem vai apresentar os esquemas, as consultas e o painel. O enuncia
 
 **Falar:**
 
-- O gerador simula cada aluno semestre a semestre, de 2018.1 a 2025.2: são 1.433 alunos e 30.992 matrículas.
+- O gerador simula cada aluno semestre a semestre, de 2018.1 a 2025.2: são 1.444 alunos e 29.474 matrículas.
 - A fato agregada é calculada em SQL a partir da fato por aluno, então as duas estrelas sempre fecham.
 - Rodamos 16 testes de consistência, e todos deram zero erros.
 - **Os dados são fictícios.** Colocamos alguns padrões de propósito para testar as consultas, e nenhum número descreve a UFPE.

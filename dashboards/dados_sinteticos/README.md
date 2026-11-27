@@ -2,8 +2,8 @@
 
 Os painéis reutilizam os arquivos em [`../../dados/csv/`](../../dados/csv/), sem criar uma população paralela ou duplicar os CSVs.
 
-- `dim_aluno.csv`: 1.433 alunos fictícios e sua situação final de vínculo.
-- `fato_professor_aluno.csv`: 30.992 matrículas, notas, faltas, tentativas e benefício por semestre.
+- `dim_aluno.csv`: 1.444 alunos fictícios e sua situação final de vínculo.
+- `fato_professor_aluno.csv`: 29.474 matrículas, notas, faltas, tentativas e benefício por semestre.
 - As demais dimensões, a fato agregada e a ponte de docentes estão na mesma pasta.
 
 O gerador original é [`../../gerador/gerar_dados.py`](../../gerador/gerar_dados.py).

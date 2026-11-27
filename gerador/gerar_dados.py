@@ -13,7 +13,14 @@ SAIDA = Path(__file__).resolve().parent.parent / "sql" / "02_dados_sinteticos.sq
 PANDEMIA = {20201: 0.25, 20202: 0.30, 20211: 0.20, 20212: 0.10}
 EFEITO_FAIXA = {"Ate 1,5 SM": -0.20, "1,5 a 3 SM": -0.10, "3 a 5 SM": 0.0, "Acima de 5 SM": 0.10}
 CAPACIDADE_TURMA = 55
-CARGA_SEMESTRAL = (3, 4, 4, 5, 5)
+
+# Risco de evasao por semestre, em logito. Medido por gerador/calibrar.py.
+RISCO_BASE = -3.5
+RISCO_REPROVACAO = 2.3
+RISCO_INICIO = 0.5
+RISCO_ATRASO = 0.8
+# Prazo maximo de integralizacao, em multiplos do prazo previsto do curso.
+PRAZO_MAXIMO = 1.5
 
 # 2014 a 2017 so aquecem a simulacao: sem isso, 2018 teria apenas calouros e a serie comecaria distorcida.
 SEMESTRES = [a * 10 + s for a in range(2014, 2026) for s in (1, 2)]
@@ -24,6 +31,8 @@ CURSOS = [
     (2, "EC", "Engenharia da Computacao", 10),
     (3, "SI", "Sistemas de Informacao", 8),
 ]
+
+PRAZO = {c[0]: c[3] for c in CURSOS}
 
 # codigo, nome, carga horaria, dificuldade, periodo ideal em CC, EC e SI (0 = nao cursa)
 CURRICULO = [
@@ -130,6 +139,21 @@ def matriz_do_curso(curso_id):
     return [codigo for _, codigo in sorted(pares)]
 
 
+def carga_semestral(curso_id):
+    """Cargas sorteaveis cuja media reproduz matriz / prazo previsto do curso.
+
+    O curriculo cabe no prazo para quem nao reprova, e cada reprovacao atrasa. Com
+    uma carga unica para os tres cursos, o atraso de conclusao media o tamanho da
+    matriz em vez do desempenho do aluno, e a C11 compara cursos pela aritmetica.
+    """
+    alvo = len(matriz_do_curso(curso_id)) / PRAZO[curso_id]
+    baixo, alto = math.floor(alvo), math.ceil(alvo)
+    if baixo == alto:
+        return (baixo - 1,) + (baixo,) * 8 + (baixo + 1,)
+    peso_alto = round(10 * (alvo - baixo))
+    return (baixo,) * (10 - peso_alto) + (alto,) * peso_alto
+
+
 def resultado(aluno, disc, sem, tentativa, periodo):
     if random.random() < 0.04:
         return "TRANCADO_DISCIPLINA", None, None
@@ -150,8 +174,10 @@ def resultado(aluno, disc, sem, tentativa, periodo):
 
 def simular(alunos, disciplinas, grupos):
     turmas, fatos = [], []
+    cargas = {}
     for curso_id, *_ in CURSOS:
         matriz = matriz_do_curso(curso_id)
+        cargas[curso_id] = carga_semestral(curso_id)
         for a in (x for x in alunos if x["curso"] == curso_id):
             a["pendentes"] = list(matriz)
 
@@ -160,7 +186,7 @@ def simular(alunos, disciplinas, grupos):
         demanda = {}
         for a in ativos:
             bolsista = indice_semestre(sem) - indice_semestre(a["ingresso"]) >= 1 and random.random() < 0.18
-            for codigo in a["pendentes"][:random.choice(CARGA_SEMESTRAL)]:
+            for codigo in a["pendentes"][:random.choice(cargas[a["curso"]])]:
                 demanda.setdefault(codigo, []).append((a, bolsista))
 
         for codigo in sorted(demanda):
@@ -189,13 +215,20 @@ def simular(alunos, disciplinas, grupos):
                                       bolsista=int(bolsista), tentativa=tentativa, periodo=periodo))
 
         for a in ativos:
+            periodo = indice_semestre(sem) - indice_semestre(a["ingresso"]) + 1
             if not a["pendentes"]:
                 a["situacao"], a["saida"] = "CONCLUIDO", sem
                 continue
+            # Prazo maximo: sem ele, quem acumula reprovacao fica ATIVO para sempre e
+            # nenhuma coorte antiga fecha. E o motivo "ultrapassou prazo maximo".
+            if periodo >= math.ceil(PRAZO_MAXIMO * PRAZO[a["curso"]]):
+                a["situacao"], a["saida"] = "EVADIDO", sem
+                continue
             resultados = a.get("ult", {}).get(sem, [True])
             reprovacao = 1 - sum(resultados) / len(resultados)
-            periodo = indice_semestre(sem) - indice_semestre(a["ingresso"]) + 1
-            risco = -3.5 + 2.3 * reprovacao + (0.5 if periodo <= 3 else 0) + (0.8 if periodo > 12 else 0)
+            risco = (RISCO_BASE + RISCO_REPROVACAO * reprovacao
+                     + (RISCO_INICIO if periodo <= 3 else 0)
+                     + (RISCO_ATRASO if periodo > PRAZO[a["curso"]] else 0))
             if random.random() < 1 / (1 + math.exp(-risco)):
                 a["situacao"], a["saida"] = "EVADIDO", sem
     return turmas, fatos
@@ -216,11 +249,24 @@ def inserts(f, tabela, colunas, linhas, lote=1000):
         f.write(";\n")
 
 
-def main():
+def simular_tudo(semente=SEMENTE):
+    """Simulacao completa e reproduzivel: mesma semente, mesmo resultado.
+
+    Separada de main() para gerador/calibrar.py medir os indicadores sem escrever SQL.
+    """
+    random.seed(semente)
     disciplinas, professores, grupos = montar_dimensoes()
     coortes, alunos = criar_alunos()
     turmas, fatos = simular(alunos, disciplinas, grupos)
-    prazo = {c[0]: c[3] for c in CURSOS}
+    return dict(disciplinas=disciplinas, professores=professores, coortes=coortes,
+                alunos=alunos, turmas=turmas, fatos=fatos)
+
+
+def main():
+    s = simular_tudo()
+    disciplinas, professores = s["disciplinas"], s["professores"]
+    coortes, alunos, turmas, fatos = s["coortes"], s["alunos"], s["turmas"], s["fatos"]
+    prazo = PRAZO
 
     fatos = [x for x in fatos if x["sem"] >= INICIO_DADOS]
     for novo_id, x in enumerate(fatos, start=1):
