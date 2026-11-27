@@ -33,7 +33,7 @@ ainda carrega número velho é o `docs/entrega_05_11.pdf`, que é binário e pre
 
 ## 2. O alvo é o roteiro do professor
 
-> **Atualização de 27/11/2026:** as seis seções estão em `docs/relatorio_final.pdf`. F2 e F3 foram feitas (C13 atraso curricular, C14 TSG, snapshot `fato_vinculo_semestre` e C15 TAP/TCA/TDA, com o teste da identidade do INEP), F4 está no texto do relatório e F5 no painel. A comparação Lobo × coorte ficou de fora: a definição de M(n) (com ou sem os desvinculados do ano) muda o resultado, e o número do `ciclo_23_11.pdf` não tem consulta no repositório que o reproduza.
+> **Atualização de 27/11/2026:** as seis seções estão em `docs/relatorio_final.pdf`. F2 e F3 foram feitas (C13 atraso curricular, C14 TSG, snapshot `fato_vinculo_semestre` e C15 TAP/TCA/TDA, com o teste da identidade do INEP), F4 está no texto do relatório e F5 no painel. A comparação Lobo × coorte entrou como C16, com M(n) contado como no Censo do INEP (cursando ou formado no ano). A versão do `ciclo_23_11.pdf` contava em M(n) também quem evadiu no ano; nessa contagem a fórmula mede a evasão do ano anterior, e é daí que vinham os +2,65 pontos e os 20,2% de 2023. Na contagem do Censo a fórmula superestima a evasão dos veteranos em todos os anos, em média 5,8 pontos, e a diferença é exatamente os calouros evadidos no ano ÷ veteranos.
 
 O relatório pedido tem seis seções. Elas são o critério de pronto deste ciclo:
 

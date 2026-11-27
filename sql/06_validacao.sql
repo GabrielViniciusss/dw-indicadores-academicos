@@ -70,4 +70,16 @@ UNION ALL SELECT 'snapshot: TAP + TCA + TDA = 100% por turma e ano',
                    WHERE v.id_turma_aluno = t.id_turma_aluno AND x.ano <= d.ano) AS situacoes
           FROM dim_turma_aluno t JOIN (SELECT DISTINCT ano FROM dim_data) d ON d.ano >= t.ano_ingresso
           WHERE t.ano_ingresso >= 2018) z
-        WHERE ingressantes <> situacoes);
+        WHERE ingressantes <> situacoes)
+UNION ALL SELECT 'lobo: base da formula (snapshot) = veteranos em risco (dim_aluno)',
+       (SELECT COUNT(*) FROM (
+          SELECT c.id_curso, y.ano,
+                 (SELECT COUNT(*) FROM (
+                    SELECT v.id_aluno FROM fato_vinculo_semestre v JOIN dim_data d ON d.id_data = v.id_data
+                    WHERE v.id_curso = c.id_curso AND d.ano = y.ano - 1
+                    GROUP BY v.id_aluno HAVING SUM(v.qtd_concluiu + v.qtd_evadiu) = 0) s) AS base_lobo,
+                 (SELECT COUNT(*) FROM dim_aluno a JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+                  LEFT JOIN dim_data ds ON ds.id_data = a.id_data_saida
+                  WHERE t.id_curso = c.id_curso AND t.ano_ingresso < y.ano AND (ds.ano IS NULL OR ds.ano >= y.ano)) AS veteranos
+          FROM dim_curso c JOIN (SELECT DISTINCT ano FROM dim_data) y ON y.ano > (SELECT MIN(ano) FROM dim_data)) z
+        WHERE base_lobo <> veteranos);

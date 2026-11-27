@@ -94,6 +94,7 @@ No DrawSQL, as duas estrelas estão em diagramas separados. No SQL, elas ficam n
 | 9 | Consultas | C13 passa a ler `curso_disciplina.periodo_curricular`, que antes só era usada na validação | C13 |
 | 10 | Consultas | C14 usa `dim_curso.semestres_previstos` como prazo da Taxa de Sucesso na Graduação | C14 |
 | 11 | Validação | Três testes do snapshot: janela de vínculo, coerência com `dim_aluno` e TAP + TCA + TDA = 100% por turma e ano | — |
+| 12 | Consultas e validação | C16 compara a evasão pela fórmula do Instituto Lobo com a coorte; um teste confere que o denominador da fórmula, calculado pelo snapshot, é igual aos veteranos em risco de `dim_aluno` | C16 |
 
 Nenhuma tabela ou coluna existente mudou, e C1 a C12 devolvem os mesmos resultados. O snapshot não substitui `dim_aluno`: a dimensão continua com o retrato final do vínculo (SCD Tipo 1), e o snapshot guarda a história semestre a semestre. A justificativa de não usar SCD Tipo 2 está no relatório final, seção 3.3.
 

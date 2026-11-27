@@ -68,12 +68,12 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <section class="cover">
   <div class="eyebrow">DATA WAREHOUSE · UFPE · RELATÓRIO FINAL DO PROJETO</div>
   <h1>Data warehouse de indicadores acadêmicos da graduação</h1>
-  <p class="sub">Três tabelas fato com dimensões compartilhadas, 15 consultas analíticas e um painel de indicadores sobre rendimento em disciplinas, trajetória dos alunos e indicadores institucionais (INEP e TCU).</p>
+  <p class="sub">Três tabelas fato com dimensões compartilhadas, 16 consultas analíticas e um painel de indicadores sobre rendimento em disciplinas, trajetória dos alunos e indicadores institucionais (INEP e TCU).</p>
   <div class="facts">
     <div><strong>3</strong><span>tabelas fato: matrícula, oferta agregada e snapshot do vínculo</span></div>
     <div><strong>8</strong><span>dimensões e tabelas de apoio compartilhadas</span></div>
-    <div><strong>15</strong><span>consultas SQL, todas com gráfico</span></div>
-    <div><strong>19</strong><span>testes de consistência, todos com zero erros</span></div>
+    <div><strong>16</strong><span>consultas SQL, todas com gráfico</span></div>
+    <div><strong>20</strong><span>testes de consistência, todos com zero erros</span></div>
   </div>
   <div class="team">Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb<br>Entrega: novembro de 2026 · repositório <code style="background:#ffffff1a;color:#e8f1f4">dw-indicadores-academicos</code></div>
   <div class="warn">Todos os dados são sintéticos, produzidos por um gerador com semente fixa. Nomes de alunos e professores são pseudônimos, e nenhum número deste relatório descreve a UFPE.</div>
@@ -90,7 +90,7 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
   <div><b>6</b>Gráficos</div>
   <div><b>7</b>Validação, reprodução e limites</div>
 </div>
-<div class="box"><p><strong>Como este relatório foi produzido.</strong> O SQL da seção 5 é copiado de <code>sql/05_consultas.sql</code> no momento de gerar o PDF. As figuras da seção 6 são capturadas do painel interativo do projeto, e um script (<code>dashboards/validar.py</code>) confere, linha a linha, que o painel devolve os mesmos resultados das 15 consultas. Os números citados no texto foram medidos no MySQL 8 sobre a carga atual.</p></div>
+<div class="box"><p><strong>Como este relatório foi produzido.</strong> O SQL da seção 5 é copiado de <code>sql/05_consultas.sql</code> no momento de gerar o PDF. As figuras da seção 6 são capturadas do painel interativo do projeto, e um script (<code>dashboards/validar.py</code>) confere, linha a linha, que o painel devolve os mesmos resultados das 16 consultas. Os números citados no texto foram medidos no MySQL 8 sobre a carga atual.</p></div>
 </section>
 
 <!-- ============================== 1 ============================== -->
@@ -109,7 +109,7 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <p>A inspiração foram os observatórios de dados indicados na disciplina. Do painel público <em>Indicadores Graduação</em> da UFPB (Metabase) veio o modelo de fato de vínculo discente com filtros conformados. Do <em>Relatório Analítico sobre Controle de Evasão e Retenção</em> da UFRPE vieram as fórmulas de evasão e de sucesso e a ideia de mostrar ingressantes, concluintes e desvinculados no mesmo gráfico. Com essas referências, adotamos um critério para consulta boa: ela tem denominador (é taxa, não contagem bruta), usa a população certa como base, declara a aditividade do que soma e escolhe o gráfico pela forma do dado.</p>
 
 <h3>1.3 Perguntas de negócio</h3>
-<p>As 15 perguntas abaixo orientaram o esquema: cada coluna que acrescentamos aos diagramas originais existe porque alguma delas precisava. C1 a C12 estão em ordem de prioridade para a gestão. C13 a C15 foram acrescentadas nesta etapa para cobrir a matriz curricular e os indicadores institucionais.</p>
+<p>As 16 perguntas abaixo orientaram o esquema: cada coluna que acrescentamos aos diagramas originais existe porque alguma delas precisava. C1 a C12 estão em ordem de prioridade para a gestão. C13 a C16 foram acrescentadas nesta etapa para cobrir a matriz curricular, os indicadores institucionais e a medição da evasão.</p>
 <table>
 <thead><tr><th style="width:9%">#</th><th>Pergunta</th><th style="width:22%">Quem usa</th><th style="width:15%">Fato</th></tr></thead>
 <tbody>
@@ -128,6 +128,7 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <tr><td>C13</td><td>Quanto as matrículas estão atrasadas em relação ao período previsto da disciplina na matriz?</td><td>Coordenação: fluxo curricular</td><td>Matrícula + matriz</td></tr>
 <tr><td>C14</td><td>Qual a Taxa de Sucesso na Graduação de cada curso por ano?</td><td>Pró-reitoria: TCU e orçamento</td><td>Dimensão aluno</td></tr>
 <tr><td>C15</td><td>Ano a ano, que parte de cada turma de ingresso permanece, concluiu ou desistiu (TAP, TCA, TDA)?</td><td>Pró-reitoria: indicadores INEP</td><td>Snapshot</td></tr>
+<tr><td>C16</td><td>Quanto a fórmula de evasão anual que as instituições publicam (Instituto Lobo) se afasta da evasão medida pela coorte?</td><td>Pró-reitoria: leitura dos indicadores</td><td>Dimensão aluno</td></tr>
 </tbody></table>
 
 <h3>1.4 Visão geral do esquema</h3>
@@ -381,7 +382,7 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <tr><td>Tabela de cobertura</td><td><code>curso_disciplina</code> registra que disciplina pertence a que período de cada curso, mesmo sem matrícula. É ela que permite medir o atraso (C13).</td></tr>
 <tr><td>Chaves estrangeiras redundantes no fato</td><td>Disciplina, curso e semestre estão na matrícula, embora sejam dedutíveis da oferta, para que cada consulta faça junção direta. Um teste garante a coerência.</td></tr>
 <tr><td>Chave inteligente de data</td><td><code>id_data = ano × 10 + semestre</code>. A bibliografia recomenda chave substituta pura; mantivemos porque a chave é legível, estável e ordenável, e trocá-la tocaria todas as tabelas. É uma escolha declarada.</td></tr>
-<tr><td>Carga reprodutível e testada</td><td>Gerador com semente fixa → DDL → dados → agregada → ponte → snapshot → 19 testes (<code>scripts/carregar.sh</code>). Reexecutar reproduz a base byte a byte.</td></tr>
+<tr><td>Carga reprodutível e testada</td><td>Gerador com semente fixa → DDL → dados → agregada → ponte → snapshot → 20 testes (<code>scripts/carregar.sh</code>). Reexecutar reproduz a base byte a byte.</td></tr>
 </tbody></table>
 </section>
 
@@ -449,12 +450,17 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <div class="q"><div class="qhead"><span class="id">C15</span><h3>TAP, TCA e TDA por turma de ingresso (INEP)</h3></div>
 <p>Usa o snapshot. <code>fluxo</code> soma, por coorte e ano, os ativos <strong>apenas no último semestre do ano</strong> (estoque semi-aditivo) e todas as conclusões e evasões do ano (fluxos). <code>serie</code> cruza cada coorte com todos os anos desde o ingresso, para que anos sem saída também apareçam, e acumula os fluxos com <code>SUM() OVER (ORDER BY ano)</code>. As três taxas dividem pelos ingressantes da turma e somam 100% em todo ano, o que um teste confere.</p>
 <pre class="sql" data-sql="15"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C16</span><h3>Evasão anual: fórmula do Lobo × coorte</h3></div>
+<p>A fórmula do Instituto Lobo estima a evasão anual só com contagens agregadas: EV(n) = 1 − (M(n) − I(n)) / (M(n−1) − C(n−1)), onde M são as matrículas, I os ingressantes e C os concluintes do ano. As instituições a usam porque nem sempre conseguem acompanhar cada aluno. Nós conseguimos, então dá para comparar a fórmula com a evasão real dos veteranos (os que já estavam no curso antes do ano). A CTE <code>ano_curso</code> conta, por curso e ano, as matrículas como faz o Censo do INEP (cursando ou formado no ano; quem se desvinculou não entra), os ingressantes, os concluintes e os veteranos. <code>LAG()</code> traz o denominador do ano anterior. A consulta externa calcula a fórmula, a coorte e a diferença.</p>
+<p>Desenvolvendo a fórmula com essa contagem, o denominador M(n−1) − C(n−1) é exatamente o número de veteranos do ano n, e o numerador soma os veteranos que evadiram mais os calouros que entraram e evadiram no mesmo ano, que não estão no denominador. Por isso a diferença em relação à coorte é exatamente <code>evadidos_calouros / base_veteranos</code>. O painel calcula a fórmula por essa forma simplificada e o SQL pela forma literal; o <code>validar.py</code> confere que as duas coincidem nas 21 linhas. A definição de M importa: se ela incluísse quem evadiu no próprio ano, a fórmula passaria a medir a evasão do ano anterior.</p>
+<pre class="sql" data-sql="16"></pre></div>
 </section>
 
 <!-- ============================== 6 ============================== -->
 <section>
 <h2><span class="num">6</span>Gráficos</h2>
-<p>Os gráficos foram gerados pelo <strong>painel interativo</strong> do projeto (<code>dashboards/painel_academico_interativo.html</code>, um arquivo HTML que funciona sem internet), que recalcula as 15 consultas no navegador a partir das mesmas tabelas. O script <code>dashboards/validar.py</code> executa o SQL da seção 5 e confere que o painel devolve as mesmas linhas, com tolerância de arredondamento de 0,051. As figuras mostram o recorte padrão (todos os cursos e todos os semestres) na versão resumida que o painel usa para impressão. O painel também tem filtros por curso, semestre, coorte e disciplina, e cada consulta pode ser vista como tabela ou exportada em CSV. O repositório traz também um importador que cria as 15 consultas e os painéis no Metabase, e a equipe montou uma versão das consultas C1 a C12 no Looker Studio.</p>
+<p>Os gráficos foram gerados pelo <strong>painel interativo</strong> do projeto (<code>dashboards/painel_academico_interativo.html</code>, um arquivo HTML que funciona sem internet), que recalcula as 16 consultas no navegador a partir das mesmas tabelas. O script <code>dashboards/validar.py</code> executa o SQL da seção 5 e confere que o painel devolve as mesmas linhas, com tolerância de arredondamento de 0,051. As figuras mostram o recorte padrão (todos os cursos e todos os semestres) na versão resumida que o painel usa para impressão. O painel também tem filtros por curso, semestre, coorte e disciplina, e cada consulta pode ser vista como tabela ou exportada em CSV. O repositório traz também um importador que cria as 16 consultas e os painéis no Metabase, e a equipe montou uma versão das consultas C1 a C12 no Looker Studio.</p>
 <figure><img src="figuras/painel.png" alt="Visão geral do painel interativo"><figcaption>Figura 0. Painel interativo: filtros globais, cinco páginas temáticas e indicadores-resumo do recorte.</figcaption></figure>
 <div class="box warn"><p><strong>Como ler os resultados.</strong> Os dados são sintéticos. Alguns efeitos foram programados no gerador de propósito: disciplinas com dificuldades diferentes, primeiros períodos mais difíceis, notas mais altas em 2020 e 2021 e uma pequena vantagem de habilidade nas faixas de renda mais altas. A cota e a bolsa são sorteadas sem efeito sobre o desempenho. Um padrão nos gráficos é, portanto, a demonstração de que a consulta detecta o que foi simulado, e não uma descoberta sobre a UFPE.</p></div>
 
@@ -539,6 +545,11 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <p class="meta">Por que: TAP, TCA e TDA são exclusivas e somam 100% em todo ano. A barra de 100% mostra a composição e a sua evolução sem sugerir que o total mudou. Cada barra é o fim de um ano da mesma turma.</p>
 <figure class="tall"><img src="figuras/C15.png" alt="C15"><figcaption>Figura 15. Turma de ingresso 2018.1: permanência (TAP), conclusão acumulada (TCA) e desistência acumulada (TDA) no fim de cada ano.</figcaption></figure></div>
 <p>Na turma 2018.1, a desistência aparece logo no primeiro ano (22% a 26%), a conclusão só começa perto do prazo previsto, e a permanência vai a zero quando a turma fecha. A trajetória termina com 72,2% de conclusão no SI, 40,0% no CC e 36,8% na EC. É a mesma informação da C2, agora reconstituída ano a ano, o que só o snapshot do vínculo permite.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C16</span><h3>Duas linhas com a diferença sombreada</h3></div>
+<p class="meta">Por que: a pergunta é o quanto uma medida se afasta da outra. As duas linhas no mesmo eixo, com a faixa entre elas sombreada e o valor da diferença anotado, mostram a diferença diretamente, que é o achado. O eixo vai até 30% para que uma diferença de poucos pontos não se perca numa escala até 100%.</p>
+<figure><img src="figuras/C16.png" alt="C16"><figcaption>Figura 16. Evasão anual pela fórmula do Instituto Lobo e pela coorte, somando os três cursos.</figcaption></figure></div>
+<p>A fórmula superestima a evasão em todos os anos de 2019 a 2025: em média 5,8 pontos, com mínimo de 4,1 (2019) e máximo de 7,8 (2022). Em 2022, por exemplo, ela indica 24,7%, enquanto 16,9% dos veteranos evadiram de fato. A diferença não é ruído: é sempre igual aos calouros que entraram e evadiram no mesmo ano divididos pelos veteranos, e o teste de validação confirma que o denominador da fórmula coincide com a base real de veteranos. Como a evasão no primeiro ano é a mais alta (C4, C15), a fórmula atribui aos veteranos uma evasão que, na verdade, é dos calouros. Só é possível medir esse erro porque o DW guarda a trajetória de cada aluno; um observatório que tem apenas os totais anuais não consegue fazer essa conta.</p></div>
 </section>
 
 <!-- ============================== 7 ============================== -->
@@ -546,12 +557,12 @@ figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center
 <h2><span class="num">7</span>Validação, reprodução e limites</h2>
 <h3>7.1 Validação</h3>
 <ul>
-  <li><strong>19 testes de consistência</strong> em <code>sql/06_validacao.sql</code>, todos com zero erros. Entre eles: as duas estrelas têm as mesmas matrículas, notas e faltas; as situações e as faixas de nota fecham com os totais; a nota é coerente com a situação; não há matrícula antes do ingresso nem depois da saída; os pesos da ponte somam 1; o snapshot coincide com <code>dim_aluno</code>; e TAP + TCA + TDA = 100% em cada turma e ano. Este último teste foi confirmado com uma quebra proposital: alterar uma única linha do snapshot gera um erro.</li>
-  <li><strong>Painel contra SQL:</strong> <code>dashboards/validar.py</code> executa as 15 consultas e compara com o painel linha a linha, além de testar filtros combinados e o recorte vazio.</li>
+  <li><strong>20 testes de consistência</strong> em <code>sql/06_validacao.sql</code>, todos com zero erros. Entre eles: as duas estrelas têm as mesmas matrículas, notas e faltas; as situações e as faixas de nota fecham com os totais; a nota é coerente com a situação; não há matrícula antes do ingresso nem depois da saída; os pesos da ponte somam 1; o snapshot coincide com <code>dim_aluno</code>; TAP + TCA + TDA = 100% em cada turma e ano; e o denominador da fórmula do Lobo, calculado pelo snapshot, coincide com os veteranos em risco calculados de <code>dim_aluno</code>. Os dois últimos testes foram confirmados com quebras propositais: alterar uma única linha do snapshot gera um erro.</li>
+  <li><strong>Painel contra SQL:</strong> <code>dashboards/validar.py</code> executa as 16 consultas e compara com o painel linha a linha, além de testar filtros combinados e o recorte vazio.</li>
 </ul>
 <h3>7.2 Como reproduzir</h3>
-<pre class="sql">./scripts/carregar.sh -uroot -p                  # gera os dados, cria o banco, deriva agregada e snapshot, roda os 19 testes
-mysql -uroot -p --table &lt; sql/05_consultas.sql   # as 15 consultas
+<pre class="sql">./scripts/carregar.sh -uroot -p                  # gera os dados, cria o banco, deriva agregada e snapshot, roda os 20 testes
+mysql -uroot -p --table &lt; sql/05_consultas.sql   # as 16 consultas
 python3 scripts/exportar_csv.py -uroot -p        # atualiza dados/csv
 python3 dashboards/build_demo.py                 # remonta o painel e os SQLs do Metabase
 python3 dashboards/validar.py                    # confere o painel contra as consultas
@@ -571,6 +582,8 @@ node scripts/gerar_relatorio.mjs                 # figuras e este PDF</pre>
   <li>INEP/DEED. <em>Metodologia de cálculo dos indicadores de fluxo da educação superior</em>, 2017 (TAP, TCA, TDA).</li>
   <li>UFRPE/PREG, Observatório de Dados da Graduação. <em>Relatório analítico sobre controle de evasão e de retenção na UFRPE</em>, 2021 (TSG e fórmulas de evasão).</li>
   <li>UFPB/STI. Painel público <em>Indicadores Graduação</em> (Metabase), metabase.ufpb.br.</li>
+  <li>SILVA FILHO, R. L. L.; LOBO, M. B. C. M. Esclarecimentos metodológicos sobre os cálculos de evasão. Instituto Lobo, 2011 (fórmula de evasão anual).</li>
+  <li>INEP. <em>Resumo técnico do Censo da Educação Superior 2009</em> (matrícula como soma dos alunos cursando, prováveis formandos e formados, com referência em dezembro).</li>
 </ul>
 </section>
 </body>

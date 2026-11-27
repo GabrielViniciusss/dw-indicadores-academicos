@@ -14,7 +14,7 @@ const shareIcon=icon('<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2m3 6a5
 const closeIcon=icon('<path d="m6 6 12 12M6 18 18 6"/>');
 function readGlobalFilters(){return Object.fromEntries(globalFilterKeys.map(key=>[key,$(key).value]));}
 // Indicadores de vínculo ignoram os filtros de matrícula que não se aplicam a eles.
-const ignoredFilters={C2:['semestre','disciplina'],C11:['semestre','disciplina'],C14:['semestre','coorte','disciplina'],C15:['semestre','disciplina']};
+const ignoredFilters={C2:['semestre','disciplina'],C11:['semestre','disciplina'],C14:['semestre','coorte','disciplina'],C15:['semestre','disciplina'],C16:['semestre','coorte','disciplina']};
 function queryFilterKeys(id){return [...globalFilterKeys.filter(key=>!(ignoredFilters[id]||[]).includes(key)),...(extraFilters[id]||[])];}
 function filterOptions(key){
  switch(key){
@@ -123,7 +123,7 @@ function focusFilters(id){
   const currentValue=localFilters[id]&&Object.hasOwn(localFilters[id],key)?localFilters[id][key]:'__painel';
   const inheritedLabel=inherited?(filterOptions(key).find(([v])=>v===globals[key])?.[1]||'Todos'):'Todos';
   return `<label>${filterLabels[key]}<select data-local-query="${id}" data-local-key="${key}" class="${currentValue!=='__painel'?'active':''}"><option value="__painel" ${currentValue==='__painel'?'selected':''}>${inherited?'Do painel: ':'Padrão: '}${escape(inheritedLabel)}</option><option value="" ${currentValue===''?'selected':''}>Todos</option>${filterOptions(key).map(([value,label])=>`<option value="${escape(value)}" ${currentValue===value?'selected':''}>${escape(label)}</option>`).join('')}</select></label>`;
- }).join('')}</div><div class="focus-filter-footer"><p>${id==='C14'?'Indicador anual de curso: semestre da matrícula, turma de ingresso e disciplina não se aplicam.':['C2','C11','C15'].includes(id)?'Indicador de vínculo: semestre da matrícula e disciplina não se aplicam.':'O histórico de C10 e a seleção de disciplinas críticas permanecem os da base completa.'}</p><button class="button subtle" type="button" data-reset-local="${id}">Usar filtros do painel</button></div></details>`;
+ }).join('')}</div><div class="focus-filter-footer"><p>${['C14','C16'].includes(id)?'Indicador anual de curso: semestre da matrícula, turma de ingresso e disciplina não se aplicam.':['C2','C11','C15'].includes(id)?'Indicador de vínculo: semestre da matrícula e disciplina não se aplicam.':'O histórico de C10 e a seleção de disciplinas críticas permanecem os da base completa.'}</p><button class="button subtle" type="button" data-reset-local="${id}">Usar filtros do painel</button></div></details>`;
 }
 function openInvestigation(subjectId){
  if(!Object.hasOwn(model.subjects,String(subjectId)))return;
