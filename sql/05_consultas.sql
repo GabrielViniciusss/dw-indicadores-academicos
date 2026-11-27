@@ -1,4 +1,4 @@
--- Consultas da entrega. A numeracao segue docs/entrega_05_11.pdf.
+-- Consultas do relatorio final. C1 a C12 seguem a numeracao de docs/entrega_05_11.pdf; C13 a C15 entraram depois.
 -- Taxas sobre matriculas com resultado (sem trancamentos), salvo indicacao.
 USE dw_academico;
 
@@ -210,3 +210,85 @@ JOIN dim_disciplina di ON di.id_disciplina = f.id_disciplina
 JOIN dim_data d ON d.id_data = f.id_data
 GROUP BY di.nome_disciplina, d.ano_semestre, p.nome_professor, t.codigo_turma
 ORDER BY di.nome_disciplina, d.ano_semestre, t.codigo_turma, p.nome_professor;
+
+-- C13. Em cada semestre, quanto as matriculas estao atrasadas em relacao ao periodo previsto da disciplina na matriz do curso?
+-- Atraso = periodo do aluno (semestres desde o ingresso) - periodo curricular da disciplina. Negativo = adiantado.
+SELECT c.codigo_curso, d.ano_semestre, m.periodo_curricular, COUNT(*) AS matriculas,
+       ROUND(AVG(f.periodo_aluno - m.periodo_curricular), 2) AS atraso_medio,
+       ROUND(100 * SUM(f.periodo_aluno > m.periodo_curricular) / COUNT(*), 1) AS pct_atrasadas
+FROM fato_professor_aluno f
+JOIN curso_disciplina m ON m.id_curso = f.id_curso AND m.id_disciplina = f.id_disciplina
+JOIN dim_curso c ON c.id_curso = f.id_curso
+JOIN dim_data d ON d.id_data = f.id_data
+GROUP BY c.codigo_curso, d.ano_semestre, m.periodo_curricular
+ORDER BY c.codigo_curso, d.ano_semestre, m.periodo_curricular;
+
+-- C14. Qual e a Taxa de Sucesso na Graduacao (TSG) de cada curso por ano?
+-- TSG(n) = concluintes no ano n / ingressantes das turmas cujo prazo previsto termina no ano n.
+-- So entram anos em que essas turmas ingressaram a partir de 2018: as anteriores so tem quem ainda estava no curso em 2018.
+WITH previstas AS (
+  -- turma de ingresso e o ano em que termina o seu prazo previsto
+  SELECT t.id_curso, t.id_turma_aluno, t.ano_ingresso, d.ano
+  FROM dim_turma_aluno t
+  JOIN dim_curso c ON c.id_curso = t.id_curso
+  JOIN dim_data d ON d.ano * 2 + d.semestre = t.ano_ingresso * 2 + t.semestre_ingresso + c.semestres_previstos - 1
+),
+base AS (
+  SELECT p.id_curso, p.ano, COUNT(a.id_aluno) AS ingressantes,
+         MIN(p.ano_ingresso) AS primeira_coorte, COUNT(DISTINCT p.id_turma_aluno) AS turmas
+  FROM previstas p
+  LEFT JOIN dim_aluno a ON a.id_turma_aluno = p.id_turma_aluno
+  GROUP BY p.id_curso, p.ano
+),
+concluintes AS (
+  SELECT t.id_curso, d.ano, COUNT(*) AS concluintes
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  JOIN dim_data d ON d.id_data = a.id_data_saida
+  WHERE a.situacao_vinculo = 'CONCLUIDO'
+  GROUP BY t.id_curso, d.ano
+)
+SELECT c.codigo_curso, b.ano, c.semestres_previstos, COALESCE(k.concluintes, 0) AS concluintes,
+       b.ingressantes AS ingressantes_previstos,
+       ROUND(100 * COALESCE(k.concluintes, 0) / NULLIF(b.ingressantes, 0), 1) AS tsg
+FROM base b
+JOIN dim_curso c ON c.id_curso = b.id_curso
+LEFT JOIN concluintes k ON k.id_curso = b.id_curso AND k.ano = b.ano
+WHERE b.primeira_coorte >= 2018 AND b.turmas = 2 -- os dois semestres do ano tem turma prevista
+ORDER BY c.codigo_curso, b.ano;
+
+-- C15. Ano a ano, que parte de cada turma de ingresso permanece, concluiu ou desistiu (TAP, TCA e TDA do INEP)?
+-- Sobre o snapshot fato_vinculo_semestre. TAP = ativos no fim do ano; TCA e TDA acumulam concluintes e evadidos.
+-- Denominador: ingressantes da turma (nao ha falecidos na base). TAP + TCA + TDA = 100% em todo ano.
+WITH turma AS (
+  SELECT t.id_turma_aluno, t.id_curso, t.ano_ingresso, t.ano_semestre_ingresso, COUNT(*) AS ingressantes
+  FROM dim_aluno a
+  JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+  WHERE t.ano_ingresso >= 2018
+  GROUP BY t.id_turma_aluno, t.id_curso, t.ano_ingresso, t.ano_semestre_ingresso
+),
+anos AS (SELECT DISTINCT ano FROM dim_data),
+fluxo AS (
+  -- ativos so no ultimo semestre do ano: estoque nao se soma entre semestres
+  SELECT v.id_turma_aluno, d.ano,
+         SUM(CASE WHEN d.semestre = (SELECT MAX(x.semestre) FROM dim_data x WHERE x.ano = d.ano) THEN v.qtd_ativo ELSE 0 END) AS ativos,
+         SUM(v.qtd_concluiu) AS concluintes, SUM(v.qtd_evadiu) AS evadidos
+  FROM fato_vinculo_semestre v
+  JOIN dim_data d ON d.id_data = v.id_data
+  GROUP BY v.id_turma_aluno, d.ano
+),
+serie AS (
+  SELECT k.id_curso, k.ano_semestre_ingresso, y.ano, k.ingressantes, COALESCE(f.ativos, 0) AS ativos,
+         SUM(COALESCE(f.concluintes, 0)) OVER (PARTITION BY k.id_turma_aluno ORDER BY y.ano) AS concluintes_acum,
+         SUM(COALESCE(f.evadidos, 0)) OVER (PARTITION BY k.id_turma_aluno ORDER BY y.ano) AS evadidos_acum
+  FROM turma k
+  JOIN anos y ON y.ano >= k.ano_ingresso
+  LEFT JOIN fluxo f ON f.id_turma_aluno = k.id_turma_aluno AND f.ano = y.ano
+)
+SELECT c.codigo_curso, s.ano_semestre_ingresso, s.ano, s.ingressantes,
+       ROUND(100 * s.ativos / s.ingressantes, 1) AS tap,
+       ROUND(100 * s.concluintes_acum / s.ingressantes, 1) AS tca,
+       ROUND(100 * s.evadidos_acum / s.ingressantes, 1) AS tda
+FROM serie s
+JOIN dim_curso c ON c.id_curso = s.id_curso
+ORDER BY c.codigo_curso, s.ano_semestre_ingresso, s.ano;

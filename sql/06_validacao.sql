@@ -48,4 +48,26 @@ UNION ALL SELECT 'toda matricula esta na matriz do curso',
        (SELECT COUNT(*) FROM fato_professor_aluno f LEFT JOIN curso_disciplina m
           ON m.id_curso = f.id_curso AND m.id_disciplina = f.id_disciplina WHERE m.id_curso IS NULL)
 UNION ALL SELECT 'pesos da ponte somam 1 por turma',
-       (SELECT COUNT(*) FROM (SELECT id_turma_disciplina FROM vw_turma_professor GROUP BY id_turma_disciplina HAVING ABS(SUM(peso) - 1) > 0.001) x);
+       (SELECT COUNT(*) FROM (SELECT id_turma_disciplina FROM vw_turma_professor GROUP BY id_turma_disciplina HAVING ABS(SUM(peso) - 1) > 0.001) x)
+UNION ALL SELECT 'snapshot: nenhuma linha antes do ingresso ou apos a saida',
+       (SELECT COUNT(*) FROM fato_vinculo_semestre v JOIN dim_aluno a ON a.id_aluno = v.id_aluno
+        JOIN dim_turma_aluno t ON t.id_turma_aluno = a.id_turma_aluno
+        WHERE v.id_data < t.ano_ingresso * 10 + t.semestre_ingresso OR (a.id_data_saida IS NOT NULL AND v.id_data > a.id_data_saida))
+UNION ALL SELECT 'snapshot: saidas e ativos finais iguais a dim_aluno',
+       ABS((SELECT SUM(qtd_concluiu) FROM fato_vinculo_semestre) - (SELECT COUNT(*) FROM dim_aluno WHERE situacao_vinculo = 'CONCLUIDO'))
+     + ABS((SELECT SUM(qtd_evadiu) FROM fato_vinculo_semestre) - (SELECT COUNT(*) FROM dim_aluno WHERE situacao_vinculo = 'EVADIDO'))
+     + ABS((SELECT SUM(qtd_ativo) FROM fato_vinculo_semestre WHERE id_data = (SELECT MAX(id_data) FROM dim_data))
+           - (SELECT COUNT(*) FROM dim_aluno WHERE situacao_vinculo = 'ATIVO'))
+UNION ALL SELECT 'snapshot: TAP + TCA + TDA = 100% por turma e ano',
+       (SELECT COUNT(*) FROM (
+          SELECT t.id_turma_aluno, d.ano,
+                 (SELECT COUNT(*) FROM dim_aluno a WHERE a.id_turma_aluno = t.id_turma_aluno) AS ingressantes,
+                 (SELECT COALESCE(SUM(v.qtd_ativo), 0) FROM fato_vinculo_semestre v
+                   WHERE v.id_turma_aluno = t.id_turma_aluno
+                     AND v.id_data = (SELECT MAX(x.id_data) FROM dim_data x WHERE x.ano = d.ano))
+               + (SELECT COALESCE(SUM(v.qtd_concluiu + v.qtd_evadiu), 0) FROM fato_vinculo_semestre v
+                   JOIN dim_data x ON x.id_data = v.id_data
+                   WHERE v.id_turma_aluno = t.id_turma_aluno AND x.ano <= d.ano) AS situacoes
+          FROM dim_turma_aluno t JOIN (SELECT DISTINCT ano FROM dim_data) d ON d.ano >= t.ano_ingresso
+          WHERE t.ano_ingresso >= 2018) z
+        WHERE ingressantes <> situacoes);

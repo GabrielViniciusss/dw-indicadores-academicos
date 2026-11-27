@@ -144,3 +144,25 @@ CREATE TABLE fato_professor_disciplina (
   FOREIGN KEY (id_curso) REFERENCES dim_curso (id_curso),
   FOREIGN KEY (id_data) REFERENCES dim_data (id_data)
 );
+
+-- [AJUSTE] Snapshot periodico do vinculo, derivado em sql/07_snapshot_vinculo.sql.
+-- GRAO: 1 linha por aluno x semestre, do ingresso (ou 2018.1) ate o semestre da saida, inclusive.
+-- O semestre da saida traz a situacao final; nos anteriores o aluno esta ATIVO. Quem continua ativo
+-- tem linha ate o ultimo semestre da base.
+CREATE TABLE fato_vinculo_semestre (
+  id_vinculo_semestre BIGINT PRIMARY KEY,
+  id_aluno BIGINT NOT NULL,
+  id_turma_aluno BIGINT NOT NULL,
+  id_curso BIGINT NOT NULL,
+  id_data BIGINT NOT NULL,
+  situacao_vinculo VARCHAR(20) NOT NULL, -- situacao naquele semestre: ATIVO, CONCLUIDO ou EVADIDO
+  periodo_aluno SMALLINT NOT NULL,       -- semestres desde o ingresso, como na fato por aluno
+  qtd_ativo TINYINT NOT NULL,            -- estoque: semi-aditiva, nao soma ao longo do tempo
+  qtd_concluiu TINYINT NOT NULL,         -- fluxo: 1 so no semestre da conclusao, aditiva
+  qtd_evadiu TINYINT NOT NULL,           -- fluxo: 1 so no semestre da evasao, aditiva
+  UNIQUE KEY uq_aluno_semestre (id_aluno, id_data),
+  FOREIGN KEY (id_aluno) REFERENCES dim_aluno (id_aluno),
+  FOREIGN KEY (id_turma_aluno) REFERENCES dim_turma_aluno (id_turma_aluno),
+  FOREIGN KEY (id_curso) REFERENCES dim_curso (id_curso),
+  FOREIGN KEY (id_data) REFERENCES dim_data (id_data)
+);

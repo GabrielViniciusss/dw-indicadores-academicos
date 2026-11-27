@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 python3 gerador/gerar_dados.py
-for arquivo in 01_ddl 02_dados_sinteticos 03_carga_fato_agregada 04_views; do
+for arquivo in 01_ddl 02_dados_sinteticos 03_carga_fato_agregada 04_views 07_snapshot_vinculo; do
   echo "Executando $arquivo"
   mysql --default-character-set=utf8mb4 "$@" < "sql/$arquivo.sql"
 done
