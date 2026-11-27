@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relatório final · DW de indicadores acadêmicos</title>
+<style>
+@page{size:A4;margin:18mm 18mm 20mm}
+@page :first{margin:0}
+:root{--ink:#17324d;--text:#2b3c4e;--muted:#66788a;--line:#d9e2ea;--soft:#f3f7fa;--teal:#1f7f74;--rust:#b4573f}
+*{box-sizing:border-box}
+html{font-family:"Source Sans 3","Segoe UI",Inter,ui-sans-serif,system-ui,sans-serif;color:var(--text);font-size:10.4pt;line-height:1.5}
+body{margin:0}
+h1,h2,h3,h4{color:var(--ink);line-height:1.25;break-after:avoid}
+h2{font-size:17pt;margin:0 0 4mm;padding-bottom:2mm;border-bottom:2px solid var(--ink);break-before:page}
+h2 .num{color:var(--teal);margin-right:6px}
+h3{font-size:12.5pt;margin:7mm 0 2mm}
+h4{font-size:10.8pt;margin:5mm 0 1.5mm}
+p{margin:0 0 2.6mm}
+ul,ol{margin:0 0 3mm;padding-left:6mm}li{margin:0 0 1mm}
+code{font-family:"JetBrains Mono","Cascadia Mono",Consolas,monospace;font-size:8.6pt;background:var(--soft);padding:0 3px;border-radius:3px;color:#1d4157}
+table{width:100%;border-collapse:collapse;margin:2mm 0 4mm;font-size:8.9pt;line-height:1.38;break-inside:auto}
+thead{display:table-header-group}
+tr{break-inside:avoid}
+th{background:var(--ink);color:#fff;text-align:left;font-weight:600;padding:5px 7px;vertical-align:bottom}
+td{padding:4.5px 7px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:#f8fafc}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.c,th.c{text-align:center}
+.tag{display:inline-block;font-size:7.6pt;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:9px;white-space:nowrap}
+.ad{background:#e3f2ee;color:#1d6f63}.semi{background:#e6eef8;color:#2d5f8f}.nao{background:#f8e9e4;color:#9a4632}.attr{background:#eef0f3;color:#5b6b7b}
+.box{border:1px solid var(--line);border-left:4px solid var(--teal);background:var(--soft);padding:3mm 4mm;margin:3mm 0 4mm;border-radius:0 6px 6px 0;break-inside:avoid}
+.box.warn{border-left-color:var(--rust)}
+.box p:last-child{margin:0}
+.box strong:first-child{color:var(--ink)}
+pre.sql{font-family:"JetBrains Mono","Cascadia Mono",Consolas,monospace;font-size:7.5pt;line-height:1.42;background:#f5f8fb;border:1px solid var(--line);border-radius:6px;padding:3mm 3.5mm;white-space:pre-wrap;word-break:break-word;margin:1.5mm 0 5mm;color:#203448}
+.qhead,.meta{break-after:avoid}
+.keep{break-inside:avoid}
+.qhead{display:flex;gap:8px;align-items:baseline;margin:6mm 0 1.5mm}
+.qhead .id{flex-shrink:0;background:var(--ink);color:#fff;font-weight:700;font-size:8.5pt;padding:2px 7px;border-radius:5px}
+.qhead h3{margin:0;font-size:11.2pt}
+.meta{font-size:8.8pt;color:var(--muted);margin:0 0 2mm}
+figure{margin:2mm 0 5mm;break-inside:avoid}
+figure img{display:block;max-width:100%;max-height:76mm;margin:0 auto;border:1px solid var(--line);border-radius:6px;padding:2mm;background:#fff}
+figure.tall img{max-height:140mm}
+figcaption{font-size:8.6pt;color:var(--muted);margin-top:1.5mm;text-align:center}
+.cover{height:297mm;padding:30mm 22mm 22mm;display:flex;flex-direction:column;background:linear-gradient(160deg,#173e50 0%,#17324d 62%,#1f5d63 100%);color:#e8f1f4;break-after:page}
+.cover .eyebrow{letter-spacing:2.5px;font-size:8.5pt;font-weight:700;color:#9fd8cc}
+.cover h1{color:#fff;font-size:30pt;letter-spacing:-.5px;margin:6mm 0 4mm;line-height:1.12}
+.cover .sub{font-size:13pt;color:#cfe2e8;max-width:150mm;margin:0}
+.cover .facts{margin-top:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;border-top:1px solid #ffffff33;padding-top:6mm}
+.cover .facts strong{display:block;font-size:19pt;color:#fff}
+.cover .facts span{font-size:8.5pt;color:#b8cfd7}
+.cover .team{margin-top:10mm;font-size:9.5pt;color:#cfe2e8;line-height:1.7}
+.cover .warn{margin-top:6mm;font-size:8.6pt;color:#f3d9a4;border:1px solid #f3d9a455;border-radius:6px;padding:3mm 4mm}
+.toc{columns:2;column-gap:10mm;font-size:10pt}
+.toc div{break-inside:avoid;margin-bottom:1.5mm}
+.toc b{color:var(--teal);display:inline-block;width:7mm}
+.small{font-size:8.8pt;color:var(--muted)}
+.diagram{margin:2mm 0 4mm;break-inside:avoid}
+.diagram svg{width:100%;height:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
+.check{color:var(--teal);font-weight:700}
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="eyebrow">DATA WAREHOUSE · UFPE · RELATÓRIO FINAL DO PROJETO</div>
+  <h1>Data warehouse de indicadores acadêmicos da graduação</h1>
+  <p class="sub">Três tabelas fato com dimensões compartilhadas, 15 consultas analíticas e um painel de indicadores sobre rendimento em disciplinas, trajetória dos alunos e indicadores institucionais (INEP e TCU).</p>
+  <div class="facts">
+    <div><strong>3</strong><span>tabelas fato: matrícula, oferta agregada e snapshot do vínculo</span></div>
+    <div><strong>8</strong><span>dimensões e tabelas de apoio compartilhadas</span></div>
+    <div><strong>15</strong><span>consultas SQL, todas com gráfico</span></div>
+    <div><strong>19</strong><span>testes de consistência, todos com zero erros</span></div>
+  </div>
+  <div class="team">Equipe: jlsm2, jvcn, gflb, gvab, lmq2, mffa, thrb<br>Entrega: novembro de 2026 · repositório <code style="background:#ffffff1a;color:#e8f1f4">dw-indicadores-academicos</code></div>
+  <div class="warn">Todos os dados são sintéticos, produzidos por um gerador com semente fixa. Nomes de alunos e professores são pseudônimos, e nenhum número deste relatório descreve a UFPE.</div>
+</section>
+
+<section>
+<h3 style="margin-top:0">Sumário</h3>
+<div class="toc">
+  <div><b>1</b>Contexto e objetivo do DW</div>
+  <div><b>2</b>Tabelas de fatos e tipos de medida</div>
+  <div><b>3</b>Tabelas de dimensões, valores especiais e SCD</div>
+  <div><b>4</b>Técnicas usadas em cada esquema estrela</div>
+  <div><b>5</b>Consultas em SQL</div>
+  <div><b>6</b>Gráficos</div>
+  <div><b>7</b>Validação, reprodução e limites</div>
+</div>
+<div class="box"><p><strong>Como este relatório foi produzido.</strong> O SQL da seção 5 é copiado de <code>sql/05_consultas.sql</code> no momento de gerar o PDF. As figuras da seção 6 são capturadas do painel interativo do projeto, e um script (<code>dashboards/validar.py</code>) confere, linha a linha, que o painel devolve os mesmos resultados das 15 consultas. Os números citados no texto foram medidos no MySQL 8 sobre a carga atual.</p></div>
+</section>
+
+<!-- ============================== 1 ============================== -->
+<section>
+<h2><span class="num">1</span>Contexto e objetivo do DW</h2>
+
+<h3>1.1 Domínio de negócio</h3>
+<p>O domínio é a <strong>gestão acadêmica da graduação</strong>: três cursos de um mesmo centro (Ciência da Computação, Engenharia da Computação e Sistemas de Informação), observados de 2018.1 a 2025.2. Há dois processos de negócio no centro do modelo:</p>
+<ul>
+  <li><strong>Matrícula em disciplina:</strong> a cada semestre, o aluno se matricula em ofertas (turmas) de disciplinas, e a matrícula termina com nota, faltas e uma de cinco situações: aprovado por nota, aprovado na final, reprovado por nota, reprovado por falta ou trancado.</li>
+  <li><strong>Vínculo com o curso:</strong> o aluno ingressa numa turma de ingresso (coorte), permanece ativo por alguns semestres e sai concluindo ou evadindo. A evasão inclui quem ultrapassa o prazo máximo de integralização, de 1,5 vez o prazo previsto.</li>
+</ul>
+
+<h3>1.2 Propósito analítico</h3>
+<p>O DW serve à coordenação de curso e à pró-reitoria de graduação. Ele mostra <strong>onde</strong> os alunos reprovam (disciplinas, turmas, momentos da trajetória), <strong>quem</strong> fica pelo caminho (coortes, grupos de ingresso e renda) e <strong>como o curso se sai</strong> nos indicadores pelos quais a instituição é avaliada externamente: os indicadores de trajetória do INEP (TAP, TCA e TDA) e a Taxa de Sucesso na Graduação, usada pelo TCU e na matriz orçamentária.</p>
+<p>A inspiração foram os observatórios de dados indicados na disciplina. Do painel público <em>Indicadores Graduação</em> da UFPB (Metabase) veio o modelo de fato de vínculo discente com filtros conformados. Do <em>Relatório Analítico sobre Controle de Evasão e Retenção</em> da UFRPE vieram as fórmulas de evasão e de sucesso e a ideia de mostrar ingressantes, concluintes e desvinculados no mesmo gráfico. Com essas referências, adotamos um critério para consulta boa: ela tem denominador (é taxa, não contagem bruta), usa a população certa como base, declara a aditividade do que soma e escolhe o gráfico pela forma do dado.</p>
+
+<h3>1.3 Perguntas de negócio</h3>
+<p>As 15 perguntas abaixo orientaram o esquema: cada coluna que acrescentamos aos diagramas originais existe porque alguma delas precisava. C1 a C12 estão em ordem de prioridade para a gestão. C13 a C15 foram acrescentadas nesta etapa para cobrir a matriz curricular e os indicadores institucionais.</p>
+<table>
+<thead><tr><th style="width:9%">#</th><th>Pergunta</th><th style="width:22%">Quem usa</th><th style="width:15%">Fato</th></tr></thead>
+<tbody>
+<tr><td>C1</td><td>Em cada semestre, quais são as 10 disciplinas com maior taxa de reprovação, separando reprovação por nota e por falta?</td><td>Coordenação: monitoria e frequência</td><td>Agregada</td></tr>
+<tr><td>C2</td><td>Em cada turma de ingresso, qual a proporção de alunos que concluíram, continuam ativos ou evadiram?</td><td>Coordenação: retenção</td><td>Dimensão aluno</td></tr>
+<tr><td>C3</td><td>A reprovação de beneficiários da assistência estudantil difere da dos não beneficiários ao longo dos semestres?</td><td>Assistência estudantil</td><td>Matrícula</td></tr>
+<tr><td>C4</td><td>Como varia a reprovação por nota e por falta conforme os semestres desde o ingresso?</td><td>Coordenação: acolhimento</td><td>Matrícula</td></tr>
+<tr><td>C5</td><td>Quais disciplinas têm mais alunos que reprovaram duas ou mais vezes nelas?</td><td>Coordenação: gargalos</td><td>Matrícula</td></tr>
+<tr><td>C6</td><td>Como evolui a aprovação das disciplinas críticas de um semestre para outro?</td><td>Coordenação e departamentos</td><td>Agregada</td></tr>
+<tr><td>C7</td><td>Como as matrículas das disciplinas críticas se dividem entre as cinco situações finais?</td><td>Coordenação e departamentos</td><td>Agregada</td></tr>
+<tr><td>C8</td><td>Em cada turma de ingresso, como reprovação e evasão variam por tipo de cota e faixa econômica?</td><td>Pró-reitoria: equidade</td><td>Matrícula</td></tr>
+<tr><td>C9</td><td>Nas ofertas de disciplina, como a reprovação se relaciona com a média de faltas?</td><td>Coordenação: frequência</td><td>Agregada</td></tr>
+<tr><td>C10</td><td>Quais turmas ficaram muito acima ou abaixo do histórico da mesma disciplina no curso?</td><td>Coordenação: casos atípicos</td><td>Agregada</td></tr>
+<tr><td>C11</td><td>Quanto o tempo de conclusão de cada turma de ingresso se afasta do prazo previsto?</td><td>Coordenação: planejamento de oferta</td><td>Dimensão aluno</td></tr>
+<tr><td>C12</td><td>Na mesma disciplina e semestre, como variam aprovação, nota média e tamanho das turmas de diferentes professores?</td><td>Colegiado: conversa pedagógica</td><td>Agregada + ponte</td></tr>
+<tr><td>C13</td><td>Quanto as matrículas estão atrasadas em relação ao período previsto da disciplina na matriz?</td><td>Coordenação: fluxo curricular</td><td>Matrícula + matriz</td></tr>
+<tr><td>C14</td><td>Qual a Taxa de Sucesso na Graduação de cada curso por ano?</td><td>Pró-reitoria: TCU e orçamento</td><td>Dimensão aluno</td></tr>
+<tr><td>C15</td><td>Ano a ano, que parte de cada turma de ingresso permanece, concluiu ou desistiu (TAP, TCA, TDA)?</td><td>Pró-reitoria: indicadores INEP</td><td>Snapshot</td></tr>
+</tbody></table>
+
+<h3>1.4 Visão geral do esquema</h3>
+<p>O banco <code>dw_academico</code> (MySQL 8) tem três tabelas fato que compartilham as mesmas dimensões. Cada fato responde a um tipo de pergunta: a <strong>fato de matrícula</strong> (uma linha por aluno em cada oferta) responde perguntas sobre alunos; a <strong>fato agregada</strong> (uma linha por oferta e curso) responde perguntas sobre turmas; e o <strong>snapshot do vínculo</strong> (uma linha por aluno e semestre) responde perguntas sobre permanência ao longo do tempo. As duas últimas são derivadas em SQL a partir de dados já carregados, sem sortear nada novo.</p>
+<div class="diagram">
+<svg viewBox="0 0 760 330" role="img" aria-label="Diagrama do esquema: três fatos ligados às dimensões compartilhadas">
+  <defs><style>.d rect{fill:#f3f7fa;stroke:#9fb3c4}.f rect{fill:#17324d}.d text{fill:#17324d;font-size:11px;font-weight:600}.f text{fill:#fff;font-size:11px;font-weight:700}.t{font-size:8.5px!important;font-weight:400!important}.e{stroke:#6b8296;stroke-width:1.2}.o{stroke:#9fb3c4;stroke-width:1.2;stroke-dasharray:4 3}</style></defs>
+  <!-- ligações dos fatos -->
+  <g class="e">
+    <line x1="140" y1="150" x2="85" y2="52"/><line x1="140" y1="150" x2="235" y2="52"/><line x1="140" y1="150" x2="385" y2="52"/><line x1="140" y1="182" x2="95" y2="272"/><line x1="140" y1="182" x2="440" y2="272"/>
+    <line x1="380" y1="150" x2="85" y2="52"/><line x1="380" y1="150" x2="235" y2="52"/><line x1="380" y1="150" x2="385" y2="52"/><line x1="380" y1="182" x2="440" y2="272"/>
+    <line x1="620" y1="150" x2="85" y2="52"/><line x1="620" y1="150" x2="235" y2="52"/><line x1="620" y1="182" x2="95" y2="272"/><line x1="620" y1="182" x2="265" y2="272"/>
+  </g>
+  <!-- ligações entre dimensões (outriggers e ponte) -->
+  <g class="o">
+    <line x1="160" y1="290" x2="200" y2="290"/><line x1="265" y1="272" x2="235" y2="52"/><line x1="515" y1="290" x2="555" y2="290"/><line x1="680" y1="272" x2="680" y2="52"/><line x1="535" y1="35" x2="460" y2="35"/>
+  </g>
+  <g class="d">
+    <rect x="20" y="18" width="130" height="34" rx="6"/><text x="85" y="34" text-anchor="middle">dim_data</text><text x="85" y="46" text-anchor="middle" class="t">16 semestres · papéis</text>
+    <rect x="170" y="18" width="130" height="34" rx="6"/><text x="235" y="34" text-anchor="middle">dim_curso</text><text x="235" y="46" text-anchor="middle" class="t">3 cursos</text>
+    <rect x="320" y="18" width="140" height="34" rx="6"/><text x="390" y="34" text-anchor="middle">dim_disciplina</text><text x="390" y="46" text-anchor="middle" class="t">42 disciplinas</text>
+    <rect x="535" y="18" width="110" height="34" rx="6"/><text x="590" y="34" text-anchor="middle">curso_disciplina</text><text x="590" y="46" text-anchor="middle" class="t">matriz · 104</text>
+    <rect x="655" y="18" width="95" height="34" rx="6"/><text x="702" y="34" text-anchor="middle">dim_professor</text><text x="702" y="46" text-anchor="middle" class="t">40 · 3 papéis</text>
+    <rect x="30" y="272" width="130" height="36" rx="6"/><text x="95" y="288" text-anchor="middle">dim_aluno</text><text x="95" y="300" text-anchor="middle" class="t">1.444 alunos</text>
+    <rect x="200" y="272" width="130" height="36" rx="6"/><text x="265" y="288" text-anchor="middle">dim_turma_aluno</text><text x="265" y="300" text-anchor="middle" class="t">72 coortes de ingresso</text>
+    <rect x="365" y="272" width="150" height="36" rx="6"/><text x="440" y="288" text-anchor="middle">dim_turma_disciplina</text><text x="440" y="300" text-anchor="middle" class="t">848 ofertas</text>
+    <rect x="555" y="272" width="190" height="36" rx="6"/><text x="650" y="288" text-anchor="middle">vw_turma_professor (ponte)</text><text x="650" y="300" text-anchor="middle" class="t">1.051 pares · peso = 1/n</text>
+  </g>
+  <g class="f">
+    <rect x="40" y="148" width="200" height="36" rx="7"/><text x="140" y="164" text-anchor="middle">fato_professor_aluno</text><text x="140" y="177" text-anchor="middle" class="t" style="fill:#bcd3e0">matrícula · 29.474 linhas</text>
+    <rect x="280" y="148" width="200" height="36" rx="7"/><text x="380" y="164" text-anchor="middle">fato_professor_disciplina</text><text x="380" y="177" text-anchor="middle" class="t" style="fill:#bcd3e0">oferta × curso · 2.140 linhas</text>
+    <rect x="520" y="148" width="200" height="36" rx="7"/><text x="620" y="164" text-anchor="middle">fato_vinculo_semestre</text><text x="620" y="177" text-anchor="middle" class="t" style="fill:#bcd3e0">aluno × semestre · 7.834 linhas</text>
+  </g>
+</svg>
+<p class="small">Linhas contínuas: chaves estrangeiras dos fatos. Tracejadas: ligações entre dimensões (o aluno aponta para a sua coorte, a coorte para o curso, a matriz liga curso e disciplina, e a ponte liga a oferta aos professores). A fato agregada é derivada da fato de matrícula, e o snapshot é derivado de <code>dim_aluno</code>. O esquema completo, com todas as colunas, está em <code>docs/dbml/v2_esquema.pdf</code>, gerado de <code>v2_esquema.dbml</code>.</p>
+</div>
+
+<table>
+<thead><tr><th>Tabela</th><th class="n">Linhas</th><th>Conteúdo</th></tr></thead>
+<tbody>
+<tr><td><code>dim_data</code></td><td class="n">16</td><td>Semestres letivos de 2018.1 a 2025.2</td></tr>
+<tr><td><code>dim_curso</code></td><td class="n">3</td><td>CC, EC e SI, com o prazo previsto de cada um (9, 10 e 8 semestres)</td></tr>
+<tr><td><code>dim_disciplina</code> e <code>curso_disciplina</code></td><td class="n">42 e 104</td><td>Disciplinas e a matriz curricular: em que período cada disciplina fica em cada curso</td></tr>
+<tr><td><code>dim_professor</code></td><td class="n">40</td><td>Docentes, com pseudônimos</td></tr>
+<tr><td><code>dim_turma_aluno</code></td><td class="n">72</td><td>Turmas de ingresso (coortes): 3 cursos × 24 semestres de 2014.1 a 2025.2</td></tr>
+<tr><td><code>dim_aluno</code></td><td class="n">1.444</td><td>412 ativos, 372 concluintes e 660 evadidos ao fim da base</td></tr>
+<tr><td><code>dim_turma_disciplina</code></td><td class="n">848</td><td>Ofertas de disciplina no semestre; 166 com mais de um professor</td></tr>
+<tr><td><code>fato_professor_aluno</code></td><td class="n">29.474</td><td>Uma linha por matrícula de aluno em oferta</td></tr>
+<tr><td><code>fato_professor_disciplina</code></td><td class="n">2.140</td><td>Uma linha por oferta e curso, derivada da fato de matrícula</td></tr>
+<tr><td><code>fato_vinculo_semestre</code></td><td class="n">7.834</td><td>Uma linha por aluno e semestre de vínculo, derivada de <code>dim_aluno</code></td></tr>
+</tbody></table>
+<p class="small">Os nomes das duas primeiras fatos vêm dos diagramas originais da equipe e foram mantidos para não quebrar as entregas anteriores. Apesar do nome, <code>fato_professor_aluno</code> não tem chave de professor: o vínculo com docentes passa pela oferta e pela ponte.</p>
+</section>
+
+<!-- ============================== 2 ============================== -->
+<section>
+<h2><span class="num">2</span>Tabelas de fatos</h2>
+<p>A classificação segue a definição usual: uma medida é <span class="tag ad">ADITIVA</span> quando pode ser somada por qualquer dimensão; <span class="tag semi">SEMI-ADITIVA</span> quando pode ser somada por algumas dimensões, mas não ao longo do tempo; e <span class="tag nao">NÃO ADITIVA</span> quando a soma não tem significado em nenhuma dimensão (razões, médias, mínimos, medianas). Colunas que ficam no fato sem serem medidas, como códigos de situação, aparecem como <span class="tag attr">ATRIBUTO</span> (dimensão degenerada).</p>
+
+<h3>2.1 <code>fato_professor_aluno</code>: matrícula do aluno</h3>
+<p><strong>Grão:</strong> uma linha por aluno × oferta de disciplina × curso. É o grão mais fino do modelo, e uma matrícula não se repete quando a turma tem dois ou três professores. <strong>Chaves:</strong> <code>id_aluno</code>, <code>id_turma_disciplina</code>, <code>id_disciplina</code>, <code>id_curso</code> e <code>id_data</code>. Disciplina, curso e semestre poderiam ser obtidos pela oferta, mas foram repetidos no fato para que cada consulta faça uma junção direta com a dimensão. Um teste garante que eles concordam com a oferta.</p>
+<table>
+<thead><tr><th style="width:23%">Coluna</th><th style="width:16%">Tipo</th><th>O que mede e como agregar</th></tr></thead>
+<tbody>
+<tr><td><em>contagem de linhas</em></td><td><span class="tag ad">ADITIVA</span></td><td>Cada linha é uma matrícula, então <code>COUNT(*)</code> dá o número de matrículas em qualquer recorte. Contar <strong>alunos</strong> exige <code>COUNT(DISTINCT id_aluno)</code>, que não é aditivo: o mesmo aluno aparece em vários semestres e disciplinas.</td></tr>
+<tr><td><code>quantidade_faltas</code></td><td><span class="tag ad">ADITIVA</span></td><td>Faltas da matrícula. A soma por aluno, disciplina ou semestre faz sentido. É nula no trancamento.</td></tr>
+<tr><td><code>ch_adquirida</code></td><td><span class="tag ad">ADITIVA</span></td><td>Carga horária integralizada: igual à da disciplina se aprovado, zero caso contrário. A soma por aluno dá a carga já cumprida.</td></tr>
+<tr><td><code>nota_final</code></td><td><span class="tag nao">NÃO ADITIVA</span></td><td>Nota de 0 a 10. Somar notas não significa nada. A média de um recorte é <code>SUM(nota)/COUNT(nota)</code>, recalculada a partir das linhas, nunca uma média de médias.</td></tr>
+<tr><td><code>qtd_tentativas</code></td><td><span class="tag nao">NÃO ADITIVA</span></td><td>Número da tentativa do aluno naquela disciplina (1 a 8). É um ordinal: interessa o máximo ou a distribuição, não a soma.</td></tr>
+<tr><td><code>periodo_aluno</code></td><td><span class="tag attr">ATRIBUTO</span></td><td>Semestres desde o ingresso (1 no primeiro). Calculado na carga e usado para agrupar (C4, C13), não para somar.</td></tr>
+<tr><td><code>situacao_final</code></td><td><span class="tag attr">ATRIBUTO</span></td><td>Uma das cinco situações. Dimensão degenerada: vira medida aditiva quando contada, como em <code>SUM(situacao_final = 'REPROVADO_NOTA')</code>.</td></tr>
+<tr><td><code>bolsista_no_semestre</code></td><td><span class="tag attr">ATRIBUTO</span></td><td>Indica se o aluno recebia assistência naquele semestre. Fica no fato, e não em <code>dim_aluno</code>, porque muda de um semestre para outro (seção 3.3).</td></tr>
+</tbody></table>
+
+<h3>2.2 <code>fato_professor_disciplina</code>: resultado da oferta (agregada)</h3>
+<p><strong>Grão:</strong> uma linha por oferta de disciplina × curso dos alunos × semestre. Não há aluno individual. A tabela não é carregada de fora: <code>sql/03_carga_fato_agregada.sql</code> a deriva da fato de matrícula com <code>GROUP BY</code>, e três testes conferem que as duas estrelas têm exatamente as mesmas matrículas, a mesma soma de notas e a mesma soma de faltas.</p>
+<table>
+<thead><tr><th style="width:31%">Colunas</th><th style="width:16%">Tipo</th><th>O que medem e como agregar</th></tr></thead>
+<tbody>
+<tr><td><code>qtd_matriculados</code></td><td><span class="tag ad">ADITIVA</span></td><td>Matrículas da oferta. Fecha exatamente com a soma das cinco situações abaixo (teste de validação).</td></tr>
+<tr><td><code>qtd_aprovacoes_nota</code>, <code>qtd_aprovacoes_final</code>, <code>qtd_reprovacoes_nota</code>, <code>qtd_reprovacoes_faltas</code>, <code>qtd_trancamentos</code></td><td><span class="tag ad">ADITIVAS</span></td><td>Contagens por situação. São os numeradores de todas as taxas. O denominador “matrículas com resultado” é <code>qtd_matriculados − qtd_trancamentos</code>.</td></tr>
+<tr><td><code>soma_notas_finais</code>, <code>qtd_notas_validas</code>, <code>soma_faltas</code>, <code>qtd_faltas_validas</code></td><td><span class="tag ad">ADITIVAS</span></td><td>Numerador e denominador das médias. São elas que tornam as médias reagregáveis: nota média de qualquer recorte = <code>SUM(soma_notas_finais) / SUM(qtd_notas_validas)</code> (C9, C12).</td></tr>
+<tr><td><code>qtd_nota_0_2_9</code>, <code>qtd_nota_3_6_9</code>, <code>qtd_nota_7_7_9</code>, <code>qtd_nota_8_8_9</code>, <code>qtd_nota_9_10</code></td><td><span class="tag ad">ADITIVAS</span></td><td>Histograma de notas por faixa. Fecham com <code>qtd_notas_validas</code> (teste).</td></tr>
+<tr><td><code>qtd_bolsistas_aprovados_nota</code>, <code>…_aprovados_final</code>, <code>…_reprovados_nota</code>, <code>…_reprovados_faltas</code></td><td><span class="tag ad">ADITIVAS</span></td><td>As mesmas contagens restritas a bolsistas. Nunca excedem a contagem total da situação (teste).</td></tr>
+<tr><td><code>media_notas</code>, <code>media_faltas</code></td><td><span class="tag nao">NÃO ADITIVAS</span></td><td>Razões prontas por oferta. Não se somam e não se tira média delas. As consultas usam as somas acima, e estas colunas ficam como conferência (teste: <code>media_notas = soma/qtd</code>).</td></tr>
+<tr><td><code>menor_notas</code>, <code>maior_notas</code></td><td><span class="tag nao">NÃO ADITIVAS</span></td><td>Não se somam, mas reagregam com a função certa: o mínimo de um recorte é o <code>MIN</code> dos mínimos, e o máximo é o <code>MAX</code> dos máximos.</td></tr>
+<tr><td><code>mediana_notas</code></td><td><span class="tag nao">NÃO ADITIVA</span></td><td>Não aditiva e não recuperável: a mediana de um recorte não sai das medianas das ofertas por nenhuma combinação. Só vale no grão exato da oferta.</td></tr>
+</tbody></table>
+
+<h3>2.3 <code>fato_vinculo_semestre</code>: snapshot periódico do vínculo</h3>
+<p><strong>Grão:</strong> uma linha por aluno × semestre, do ingresso (ou de 2018.1, primeiro semestre da base) até o semestre da saída, inclusive. Nos semestres anteriores à saída, o aluno está <code>ATIVO</code>. O semestre da saída traz a situação final. Quem continua ativo tem linha até 2025.2. A tabela é derivada de <code>dim_aluno</code> por <code>sql/07_snapshot_vinculo.sql</code> e foi criada nesta etapa para registrar a história do vínculo, que a dimensão guarda só como retrato final (seção 3.3).</p>
+<table>
+<thead><tr><th style="width:23%">Coluna</th><th style="width:16%">Tipo</th><th>O que mede e como agregar</th></tr></thead>
+<tbody>
+<tr><td><code>qtd_ativo</code></td><td><span class="tag semi">SEMI-ADITIVA</span></td><td>1 se o aluno está ativo no semestre. É um <strong>estoque</strong>: soma por curso, coorte ou grupo de alunos, mas <strong>não ao longo do tempo</strong>. Somar 2024.1 e 2024.2 contaria duas vezes quem estava ativo nos dois. Por isso C15 lê os ativos só no último semestre de cada ano.</td></tr>
+<tr><td><code>qtd_concluiu</code>, <code>qtd_evadiu</code></td><td><span class="tag ad">ADITIVAS</span></td><td>1 apenas no semestre da conclusão ou da evasão. São <strong>fluxos</strong>: somar ao longo do tempo é correto e dá o acumulado de saídas (TCA e TDA em C15). Somadas sobre a tabela inteira, coincidem com <code>dim_aluno</code> (teste).</td></tr>
+<tr><td><code>periodo_aluno</code></td><td><span class="tag attr">ATRIBUTO</span></td><td>Semestres desde o ingresso, com a mesma definição da fato de matrícula.</td></tr>
+<tr><td><code>situacao_vinculo</code></td><td><span class="tag attr">ATRIBUTO</span></td><td>Situação naquele semestre. Dimensão degenerada.</td></tr>
+</tbody></table>
+<div class="box"><p><strong>Por que estoque e fluxo na mesma tabela.</strong> A distinção entre semi-aditivo e aditivo aparece aqui na prática: quantos alunos estão ativos é uma foto do semestre, e quantos saíram é um movimento que se acumula. As duas medidas juntas garantem uma identidade que testamos em toda turma de ingresso e todo ano: <em>ativos no fim do ano + concluintes acumulados + evadidos acumulados = ingressantes</em>. É a identidade TAP + TCA + TDA = 100% do INEP.</p></div>
+
+<h3>2.4 Quadro-resumo das medidas por tipo</h3>
+<table>
+<thead><tr><th style="width:36%">Aditivas</th><th style="width:22%">Semi-aditivas</th><th>Não aditivas</th></tr></thead>
+<tbody><tr>
+<td><strong>Matrícula:</strong> contagem de linhas, <code>quantidade_faltas</code>, <code>ch_adquirida</code><br><strong>Agregada:</strong> <code>qtd_matriculados</code>, as 5 contagens de situação, as 5 faixas de nota, as 4 contagens de bolsistas, <code>soma_notas_finais</code>, <code>qtd_notas_validas</code>, <code>soma_faltas</code>, <code>qtd_faltas_validas</code><br><strong>Snapshot:</strong> <code>qtd_concluiu</code>, <code>qtd_evadiu</code></td>
+<td><strong>Snapshot:</strong> <code>qtd_ativo</code> (estoque: não soma no tempo)<br><br><strong>Nas consultas:</strong> contagem de alunos distintos (<code>COUNT(DISTINCT)</code>) se comporta da mesma forma: não se soma entre semestres</td>
+<td><strong>Matrícula:</strong> <code>nota_final</code>, <code>qtd_tentativas</code><br><strong>Agregada:</strong> <code>media_notas</code>, <code>media_faltas</code>, <code>menor_notas</code>, <code>maior_notas</code> (reagregam com MIN e MAX), <code>mediana_notas</code> (irrecuperável)<br><strong>Nas consultas:</strong> todas as taxas (aprovação, reprovação, evasão, TSG, TAP, TCA, TDA) e o atraso médio. São sempre calculadas como soma do numerador ÷ soma do denominador</td>
+</tr></tbody></table>
+</section>
+
+<!-- ============================== 3 ============================== -->
+<section>
+<h2><span class="num">3</span>Tabelas de dimensões</h2>
+<p>Para cada dimensão: o papel no modelo, os campos, os valores especiais (nulos e casos de borda que a análise precisa conhecer) e o tipo de SCD (<em>slowly changing dimension</em>) de cada atributo. Usamos três tipos: <strong>Tipo 0</strong> (o valor é fixado na origem e não muda), <strong>Tipo 1</strong> (uma mudança sobrescreve o valor, sem histórico) e <strong>Tipo 2</strong> (uma mudança cria uma nova versão da linha). As escolhas estão justificadas na seção 3.3.</p>
+
+<h3>3.1 Dimensões e campos</h3>
+
+<h4><code>dim_data</code>: semestre letivo · 16 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_data</code> (PK)</td><td>Chave inteligente <code>ano × 10 + semestre</code>, por exemplo 20252. Escolha consciente, discutida na seção 4.</td><td>Tipo 0</td></tr>
+<tr><td><code>ano</code>, <code>semestre</code></td><td>2018 a 2025; semestre 1 ou 2.</td><td>Tipo 0</td></tr>
+<tr><td><code>ano_semestre</code></td><td>Rótulo “2025.2”, único.</td><td>Tipo 0</td></tr>
+</tbody></table>
+<p class="small"><strong>Valores especiais:</strong> o calendário começa em 2018.1, mas as coortes começam em 2014.1. As 24 coortes de 2014 a 2017 não têm linha correspondente nesta dimensão, por isso <code>dim_turma_aluno</code> guarda ano e semestre de ingresso como atributos próprios. <strong>Papéis:</strong> a mesma dimensão é usada como semestre da matrícula (fatos), semestre da oferta (<code>dim_turma_disciplina.id_data</code>) e semestre da saída (<code>dim_aluno.id_data_saida</code>).</p>
+
+<h4><code>dim_curso</code>: curso de graduação · 3 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_curso</code> (PK), <code>codigo_curso</code></td><td>Chave substituta e código de negócio: CC, EC, SI.</td><td>Tipo 0</td></tr>
+<tr><td><code>nome_curso</code></td><td>Nome por extenso.</td><td>Tipo 1</td></tr>
+<tr><td><code>departamento</code>, <code>centro</code>, <code>campus</code></td><td>Hierarquia organizacional para <em>roll-up</em>. Hoje os três cursos têm o mesmo valor (“Centro de Informatica”, “Recife”).</td><td>Tipo 1</td></tr>
+<tr><td><code>semestres_previstos</code></td><td>Prazo previsto do curso: CC 9, EC 10, SI 8. Base de C11 e do denominador da TSG (C14).</td><td>Tipo 1</td></tr>
+</tbody></table>
+<p class="small"><strong>Valores especiais:</strong> a hierarquia existe no esquema, mas os três níveis são constantes, então o <em>drill-down</em> de campus a curso não mostra variação nestes dados. <strong>Ponto de atenção de SCD:</strong> se o projeto pedagógico mudar o prazo, a TSG de turmas antigas deve usar o prazo vigente no ingresso. Com Tipo 1, a mudança reescreveria a história; nesse caso o certo seria Tipo 2 ou guardar o prazo na coorte.</p>
+
+<h4><code>dim_disciplina</code> · 42 linhas e <code>curso_disciplina</code> (matriz curricular) · 104 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_disciplina</code> (PK), <code>codigo_disciplina</code></td><td>Chave substituta e código de negócio, como MAT101 ou CMP101.</td><td>Tipo 0</td></tr>
+<tr><td><code>nome_disciplina</code></td><td>Nome, sem acentos na base.</td><td>Tipo 1</td></tr>
+<tr><td><code>carga_horaria</code>, <code>creditos</code></td><td>60 h (37 disciplinas), 90 h (4) ou 120 h (1); 4, 6 ou 8 créditos.</td><td>Tipo 1</td></tr>
+<tr><td><code>curso_disciplina.periodo_curricular</code></td><td>Período em que a disciplina fica na matriz de cada curso. A chave é (curso, disciplina), porque a mesma disciplina pode ficar em períodos diferentes em cada curso. Base de C13.</td><td>Tipo 1</td></tr>
+</tbody></table>
+<p class="small"><strong>Valores especiais:</strong> uma disciplina que um curso não oferece simplesmente não tem linha na matriz; não há período zero. Um teste garante que toda matrícula está na matriz do curso do aluno. <strong>Limite:</strong> <code>dim_aluno.versao_curriculo</code> distingue os currículos 2018 e 2024, mas a matriz tem uma única versão. Versionar a matriz por currículo seria o próximo passo.</p>
+
+<h4><code>dim_professor</code>: docente · 40 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_professor</code> (PK), <code>matricula_professor</code></td><td>Chave substituta e matrícula funcional (P0001…).</td><td>Tipo 0</td></tr>
+<tr><td><code>nome_professor</code></td><td>Pseudônimo (“Professor 01”).</td><td>Tipo 1</td></tr>
+</tbody></table>
+
+<h4><code>dim_turma_aluno</code>: turma de ingresso (coorte) · 72 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_turma_aluno</code> (PK)</td><td>Uma linha por curso × semestre de ingresso (3 × 24).</td><td>Tipo 0</td></tr>
+<tr><td><code>id_curso</code></td><td>Curso da coorte (ligação com <code>dim_curso</code>).</td><td>Tipo 0</td></tr>
+<tr><td><code>ano_ingresso</code>, <code>semestre_ingresso</code>, <code>ano_semestre_ingresso</code></td><td>2014.1 a 2025.2.</td><td>Tipo 0</td></tr>
+</tbody></table>
+<p class="small"><strong>Valores especiais:</strong> as coortes de 2014 a 2017 são <strong>truncadas à esquerda</strong>: a base só contém os alunos delas que ainda estavam no curso em 2018. Uma taxa de evasão dessas coortes seria subestimada, por isso C2, C8, C11, C14 e C15 só usam coortes a partir de 2018. Apesar do nome, a tabela não é a turma da disciplina cursada; é a coorte de ingresso.</p>
+
+<h4><code>dim_aluno</code>: aluno · 1.444 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores (contagens na base)</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_aluno</code> (PK)</td><td>Chave substituta.</td><td>—</td></tr>
+<tr><td><code>numero_matricula</code></td><td>Chave natural, única (M000001…).</td><td>Tipo 0</td></tr>
+<tr><td><code>id_turma_aluno</code></td><td>Coorte de ingresso.</td><td>Tipo 0</td></tr>
+<tr><td><code>nome</code></td><td>Pseudônimo (“Aluno 00001”).</td><td>Tipo 1</td></tr>
+<tr><td><code>forma_ingresso</code></td><td>SISU 1.301, Transferência 73, Reintegração 47, Portador de diploma 23.</td><td>Tipo 0</td></tr>
+<tr><td><code>tipo_cota</code></td><td>Ampla concorrência 678, Escola pública 234, Escola pública e renda 256, Escola pública, renda e PPI 103, Pessoa com deficiência 30. <strong>Nulo em 143 alunos.</strong></td><td>Tipo 0</td></tr>
+<tr><td><code>faixa_economica</code></td><td>Até 1,5 SM 464, 1,5 a 3 SM 426, 3 a 5 SM 302, Acima de 5 SM 252. Registrada no ingresso.</td><td>Tipo 0</td></tr>
+<tr><td><code>versao_curriculo</code></td><td>2018 (1.179 alunos, ingresso até 2023) ou 2024 (265, ingresso a partir de 2024).</td><td>Tipo 1</td></tr>
+<tr><td><code>situacao_vinculo</code></td><td>ATIVO 412, CONCLUIDO 372, EVADIDO 660, ao fim da base.</td><td>Tipo 1</td></tr>
+<tr><td><code>id_data_saida</code></td><td>Semestre da conclusão ou da evasão. <strong>Nulo exatamente nos 412 ativos.</strong></td><td>Tipo 1</td></tr>
+</tbody></table>
+<div class="box warn"><p><strong>Valores especiais de <code>dim_aluno</code>.</strong> (1) <code>tipo_cota</code> é nulo para os 143 alunos que não entraram pelo SISU (73 + 47 + 23). O nulo significa “não se aplica”, e não “desconhecido”. A C8 e o painel o exibem como “Outras formas de ingresso”. A boa prática seria gravar esse rótulo na própria dimensão, para que nenhuma consulta precise lembrar do <code>COALESCE</code>. (2) <code>id_data_saida</code> nulo significa “ainda ativo”, e um teste garante que ele é nulo se e somente se a situação é ATIVO.</p></div>
+
+<h4><code>dim_turma_disciplina</code>: oferta de disciplina · 848 linhas</h4>
+<table>
+<thead><tr><th style="width:22%">Campo</th><th>Descrição e valores</th><th style="width:11%">SCD</th></tr></thead>
+<tbody>
+<tr><td><code>id_turma_disciplina</code> (PK)</td><td>Chave substituta. Única por (disciplina, semestre, código da turma).</td><td>Tipo 0</td></tr>
+<tr><td><code>id_disciplina</code>, <code>id_data</code></td><td>Disciplina ofertada e semestre da oferta.</td><td>Tipo 0</td></tr>
+<tr><td><code>codigo_turma</code></td><td>A, B ou C.</td><td>Tipo 0</td></tr>
+<tr><td><code>horario</code></td><td>Texto livre, por exemplo “TER 10-12; QUI 08-10”.</td><td>Tipo 1</td></tr>
+<tr><td><code>id_professor_1</code>, <code>_2</code>, <code>_3</code></td><td>Até três docentes, como papéis da mesma <code>dim_professor</code>. <strong>Professor 2 é nulo em 682 ofertas e professor 3 em 811.</strong> Só o professor 1 é sempre preenchido.</td><td>Tipo 1</td></tr>
+</tbody></table>
+<p class="small"><strong>Ponte <code>vw_turma_professor</code>:</strong> transforma os três papéis em linhas (oferta, professor, papel 1 a 3, peso = 1/n). São 1.051 pares, e os nulos acima simplesmente não geram linha. Um teste garante que os pesos de cada oferta somam 1.</p>
+
+<h3>3.2 Membro “desconhecido” e chaves nulas</h3>
+<p>As chaves estrangeiras obrigatórias dos fatos são <code>NOT NULL</code>, e a carga sintética nunca produz dimensão ausente, por isso não criamos uma linha “-1 Desconhecido” nas dimensões. Os três casos de chave opcional (professores 2 e 3 da oferta e semestre de saída do aluno) ficam fora dos fatos e são tratados como nulo com significado definido. Numa carga real, com origem sujeita a falhas, adotaríamos o membro desconhecido nas dimensões referenciadas pelos fatos.</p>
+
+<h3>3.3 SCD: o que muda, o que não muda e por quê</h3>
+<table>
+<thead><tr><th style="width:20%">Atributo</th><th style="width:12%">Tipo</th><th>Justificativa</th></tr></thead>
+<tbody>
+<tr><td>Chaves de negócio, coorte, forma de ingresso, cota, faixa econômica, calendário</td><td>Tipo 0</td><td>São fatos da origem: o aluno entra uma vez, por uma via, numa coorte. A faixa econômica é a declarada no ingresso; se fosse acompanhada a cada semestre, iria para o fato, como a bolsa.</td></tr>
+<tr><td>Nomes, carga horária, horário, prazo previsto, hierarquia do curso</td><td>Tipo 1</td><td>Correções de cadastro não mudam a análise. A exceção a vigiar é <code>semestres_previstos</code> (seção 3.1).</td></tr>
+<tr><td><code>situacao_vinculo</code>, <code>id_data_saida</code></td><td>Tipo 1, com história no snapshot</td><td>O vínculo muda no máximo uma vez por aluno (ATIVO → CONCLUIDO ou EVADIDO), e o semestre da mudança já fica em <code>id_data_saida</code>. A dimensão guarda o retrato final, e a história completa, semestre a semestre, está em <code>fato_vinculo_semestre</code>.</td></tr>
+<tr><td>Assistência estudantil</td><td>No fato</td><td>Muda de um semestre para outro. Como dimensão, exigiria uma versão por semestre (Tipo 2 com mudança rápida); por isso fica como <code>bolsista_no_semestre</code> na fato de matrícula, no grão em que acontece.</td></tr>
+</tbody></table>
+<div class="box"><p><strong>Por que não usamos Tipo 2 no vínculo.</strong> Avaliamos versionar <code>dim_aluno</code> (chave substituta por versão, <code>data_inicio</code>, <code>data_fim</code>, versão atual). Isso geraria no máximo duas versões por aluno, para guardar a mesma informação que <code>situacao_vinculo</code> + <code>id_data_saida</code> já guardam, e obrigaria a reescrever as junções de sete consultas. Além disso, o Tipo 2 sozinho não responde à pergunta que importa (“quantos estavam ativos em 2021.2?”) sem expandir as versões por semestre. O snapshot periódico entrega essa expansão pronta, com estoque e fluxo separados, e é ele que viabiliza TAP, TCA e TDA (C15). A dimensão não precisa versionar o que o fato de snapshot já historiza.</p></div>
+</section>
+
+<!-- ============================== 4 ============================== -->
+<section>
+<h2><span class="num">4</span>Técnicas usadas para projetar cada esquema estrela</h2>
+
+<h3>4.1 O processo em quatro passos, aplicado a cada estrela</h3>
+<table>
+<thead><tr><th style="width:15%">Passo</th><th>Estrela da matrícula</th><th>Estrela da oferta (agregada)</th><th>Estrela do vínculo (snapshot)</th></tr></thead>
+<tbody>
+<tr><td>1. Processo de negócio</td><td>Matrícula em disciplina e seu resultado</td><td>O mesmo processo, visto pela turma</td><td>Permanência do aluno no curso</td></tr>
+<tr><td>2. Grão</td><td>Aluno × oferta × curso (o mais fino disponível)</td><td>Oferta × curso × semestre</td><td>Aluno × semestre de vínculo</td></tr>
+<tr><td>3. Dimensões</td><td>Data, curso, disciplina, aluno, oferta</td><td>Data, curso, disciplina, oferta (+ professor pela ponte)</td><td>Data, curso, aluno, coorte</td></tr>
+<tr><td>4. Fatos</td><td>Nota, faltas, carga horária, situação</td><td>Contagens por situação, somas e histogramas</td><td>Ativo (estoque), concluiu e evadiu (fluxos)</td></tr>
+<tr><td>Tipo de fato</td><td>Transacional</td><td>Agregada derivada</td><td>Snapshot periódico</td></tr>
+</tbody></table>
+
+<h3>4.2 Matriz de barramento e dimensões conformadas</h3>
+<p>As três estrelas usam as <strong>mesmas tabelas</strong> de dimensão, com as mesmas chaves e os mesmos rótulos. Por isso um resultado de turma (agregada) e um resultado de aluno (matrícula) podem ser cruzados pelo mesmo curso e semestre sem conversão: são dimensões conformadas.</p>
+<table>
+<thead><tr><th>Fato \ dimensão</th><th class="c">data</th><th class="c">curso</th><th class="c">disciplina</th><th class="c">oferta</th><th class="c">professor</th><th class="c">aluno</th><th class="c">coorte</th></tr></thead>
+<tbody>
+<tr><td>Matrícula</td><td class="c check">✓</td><td class="c check">✓</td><td class="c check">✓</td><td class="c check">✓</td><td class="c">via oferta</td><td class="c check">✓</td><td class="c">via aluno</td></tr>
+<tr><td>Oferta (agregada)</td><td class="c check">✓</td><td class="c check">✓</td><td class="c check">✓</td><td class="c check">✓</td><td class="c">via ponte</td><td class="c">—</td><td class="c">—</td></tr>
+<tr><td>Vínculo (snapshot)</td><td class="c check">✓</td><td class="c check">✓</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c check">✓</td><td class="c check">✓</td></tr>
+</tbody></table>
+
+<h3>4.3 Catálogo das técnicas</h3>
+<table>
+<thead><tr><th style="width:26%">Técnica</th><th>Onde e por quê</th></tr></thead>
+<tbody>
+<tr><td>Grão mais fino como base</td><td>A fato de matrícula é atômica. Tudo o mais é derivado dela ou de <code>dim_aluno</code>, então nenhum número existe em duas versões.</td></tr>
+<tr><td>Fato agregada derivada, com reconciliação</td><td><code>fato_professor_disciplina</code> sai da fato de matrícula por <code>GROUP BY</code> (<code>sql/03</code>). Três testes provam que as estrelas fecham: mesmas matrículas, soma de notas e soma de faltas.</td></tr>
+<tr><td>Snapshot periódico</td><td><code>fato_vinculo_semestre</code> materializa o vínculo semestre a semestre, separando estoque (semi-aditivo) de fluxo (aditivo). Substitui o Tipo 2 na dimensão do aluno (seção 3.3).</td></tr>
+<tr><td>Numerador e denominador em vez de razões</td><td>A agregada guarda contagens e somas (<code>soma_notas_finais</code>, <code>qtd_notas_validas</code>…), e toda taxa é calculada na consulta como soma ÷ soma. Isso evita a média de médias e torna qualquer recorte reagregável.</td></tr>
+<tr><td>Dimensão com papéis (<em>role-playing</em>)</td><td><code>dim_professor</code> aparece três vezes na oferta (professores 1, 2 e 3). <code>dim_data</code> faz os papéis de semestre da matrícula, da oferta e da saída do aluno.</td></tr>
+<tr><td>Tabela ponte com fator de ponderação</td><td>A view <code>vw_turma_professor</code> resolve a relação muitos-para-muitos entre oferta e professor, com <code>peso = 1/n</code> para que somas por docente não contem a mesma turma duas vezes.</td></tr>
+<tr><td>Dimensão degenerada</td><td><code>situacao_final</code>, <code>periodo_aluno</code> e <code>qtd_tentativas</code> moram no fato, sem tabela própria: descrevem a matrícula e não têm outros atributos.</td></tr>
+<tr><td>Atributo que muda rápido vai para o fato</td><td>A assistência estudantil varia por semestre, por isso é <code>bolsista_no_semestre</code> na matrícula, e não um atributo versionado do aluno.</td></tr>
+<tr><td>Dimensões ligadas entre si (<em>outrigger</em>)</td><td><code>dim_aluno</code> → <code>dim_turma_aluno</code> → <code>dim_curso</code>: a coorte é reutilizada por C2, C11 e C15 sem repetir seus atributos em cada aluno. É um floco de neve consciente e limitado.</td></tr>
+<tr><td>Tabela de cobertura</td><td><code>curso_disciplina</code> registra que disciplina pertence a que período de cada curso, mesmo sem matrícula. É ela que permite medir o atraso (C13).</td></tr>
+<tr><td>Chaves estrangeiras redundantes no fato</td><td>Disciplina, curso e semestre estão na matrícula, embora sejam dedutíveis da oferta, para que cada consulta faça junção direta. Um teste garante a coerência.</td></tr>
+<tr><td>Chave inteligente de data</td><td><code>id_data = ano × 10 + semestre</code>. A bibliografia recomenda chave substituta pura; mantivemos porque a chave é legível, estável e ordenável, e trocá-la tocaria todas as tabelas. É uma escolha declarada.</td></tr>
+<tr><td>Carga reprodutível e testada</td><td>Gerador com semente fixa → DDL → dados → agregada → ponte → snapshot → 19 testes (<code>scripts/carregar.sh</code>). Reexecutar reproduz a base byte a byte.</td></tr>
+</tbody></table>
+</section>
+
+<!-- ============================== 5 ============================== -->
+<section>
+<h2><span class="num">5</span>Consultas em SQL</h2>
+<p>Convenções de todas as consultas: as taxas de aprovação e reprovação usam como denominador as <strong>matrículas com resultado</strong>, isto é, sem trancamentos, salvo quando indicado. Toda divisão protege o denominador zero com <code>NULLIF</code>, de modo que um indicador indefinido aparece vazio, nunca como 0%. Toda taxa é calculada como soma do numerador ÷ soma do denominador. As consultas rodam no MySQL 8 e estão em <code>sql/05_consultas.sql</code>.</p>
+
+<div class="q"><div class="qhead"><span class="id">C1</span><h3>As dez disciplinas com maior reprovação em cada semestre</h3></div>
+<p>Soma as contagens da fato agregada por semestre, curso e disciplina (<code>HAVING</code> descarta quem não teve matrícula com resultado). <code>ROW_NUMBER()</code> numera as disciplinas dentro de cada semestre e curso pela taxa total, com o código da disciplina como desempate. A consulta externa fica com as dez primeiras e separa a taxa por nota da taxa por falta.</p>
+<pre class="sql" data-sql="1"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C2</span><h3>Situação final de cada turma de ingresso</h3></div>
+<p>Lê a dimensão do aluno, sem fato: para cada coorte, conta ingressantes e a parcela em cada situação final. O filtro <code>ano_ingresso &gt;= 2018</code> exclui as coortes truncadas (seção 3.1).</p>
+<pre class="sql" data-sql="2"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C3</span><h3>Reprovação com e sem assistência estudantil</h3></div>
+<p>Usa a fato de matrícula porque a bolsa é atributo do semestre. Agrupa por curso, semestre e grupo, e conta como denominador só as matrículas com resultado.</p>
+<pre class="sql" data-sql="3"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C4</span><h3>Reprovação por semestres desde o ingresso</h3></div>
+<p>Agrupa as matrículas por <code>periodo_aluno</code>, juntando do 9º em diante numa categoria, e separa reprovação por nota e por falta. Junta aluno e coorte para permitir o filtro por turma de ingresso.</p>
+<pre class="sql" data-sql="4"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C5</span><h3>Reprovação recorrente na mesma disciplina</h3></div>
+<p>A CTE monta o histórico de cada aluno em cada disciplina (quantas vezes reprovou, de 2018.1 a 2025.2). A consulta externa mede, por disciplina, a fração de alunos que reprovaram duas ou mais vezes, uma informação que a taxa semestral isolada esconde.</p>
+<pre class="sql" data-sql="5"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C6</span><h3>Evolução da aprovação nas disciplinas críticas</h3></div>
+<p>A CTE <code>criticas</code> escolhe uma lista fixa: as dez disciplinas com maior reprovação na base inteira. Fixar a lista permite comparar as mesmas disciplinas ao longo do tempo. A consulta externa calcula a aprovação de cada oferta delas.</p>
+<pre class="sql" data-sql="6"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C7</span><h3>Composição dos resultados nas disciplinas críticas</h3></div>
+<p>Mesma lista de C6. Aqui o denominador são <strong>todas</strong> as matrículas, incluindo trancamentos, para que as cinco situações somem 100%.</p>
+<pre class="sql" data-sql="7"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C8</span><h3>Cotas, renda, reprovação e evasão</h3></div>
+<p>Cruza matrícula e aluno. A reprovação usa matrículas; a evasão usa alunos distintos (<code>COUNT(DISTINCT)</code>), porque um aluno tem muitas matrículas. O nulo de cota é rotulado como “Outras formas de ingresso”.</p>
+<pre class="sql" data-sql="8"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C9</span><h3>Faltas e reprovação por oferta</h3></div>
+<p>Uma linha por oferta e curso na fato agregada. A média de faltas sai de <code>soma_faltas / qtd_faltas_validas</code>, que são aditivas, e não da coluna pronta <code>media_faltas</code>.</p>
+<pre class="sql" data-sql="9"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C10</span><h3>Turmas fora do padrão histórico</h3></div>
+<p>Para cada oferta com ao menos 10 matrículas com resultado, uma subconsulta correlacionada calcula a taxa histórica da mesma disciplina no mesmo curso, somando reprovações e matrículas de todos os semestres anteriores (ponderada, não média de taxas). O resultado é a diferença em pontos percentuais.</p>
+<pre class="sql" data-sql="10"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C11</span><h3>Tempo de conclusão e prazo previsto</h3></div>
+<p>Para os concluintes de cada coorte, calcula a duração em semestres entre ingresso e saída (<code>ano × 2 + semestre</code> converte o semestre num índice contínuo) e compara com <code>semestres_previstos</code>.</p>
+<pre class="sql" data-sql="11"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C12</span><h3>Resultados por turma e docente</h3></div>
+<p>Junta a fato agregada à ponte <code>vw_turma_professor</code>. Uma oferta com dois docentes aparece uma vez para cada um, com a contagem integral da turma: a consulta compara ofertas, não soma docentes. A nota média sai das somas aditivas.</p>
+<pre class="sql" data-sql="12"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C13</span><h3>Atraso em relação à matriz curricular</h3></div>
+<p>Cruza a fato de matrícula com a matriz (<code>curso_disciplina</code>) pela chave composta curso + disciplina. O atraso de cada matrícula é <code>periodo_aluno − periodo_curricular</code>: quantos semestres depois do previsto o aluno cursou a disciplina. Agrupa por curso, semestre e período da matriz.</p>
+<pre class="sql" data-sql="13"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C14</span><h3>Taxa de Sucesso na Graduação (TSG)</h3></div>
+<p>TSG(n) = concluintes no ano n ÷ ingressantes das turmas cujo prazo previsto termina no ano n. A CTE <code>previstas</code> encontra, para cada coorte, o semestre em que o prazo termina, juntando com <code>dim_data</code> pelo índice contínuo de semestre (ingresso + prazo − 1). <code>base</code> soma esses ingressantes por curso e ano e registra a coorte mais antiga envolvida, e <code>concluintes</code> conta as conclusões de cada ano. Só entram anos cujas turmas previstas são de 2018 em diante e cobrem os dois semestres do ano.</p>
+<pre class="sql" data-sql="14"></pre></div>
+
+<div class="q"><div class="qhead"><span class="id">C15</span><h3>TAP, TCA e TDA por turma de ingresso (INEP)</h3></div>
+<p>Usa o snapshot. <code>fluxo</code> soma, por coorte e ano, os ativos <strong>apenas no último semestre do ano</strong> (estoque semi-aditivo) e todas as conclusões e evasões do ano (fluxos). <code>serie</code> cruza cada coorte com todos os anos desde o ingresso, para que anos sem saída também apareçam, e acumula os fluxos com <code>SUM() OVER (ORDER BY ano)</code>. As três taxas dividem pelos ingressantes da turma e somam 100% em todo ano, o que um teste confere.</p>
+<pre class="sql" data-sql="15"></pre></div>
+</section>
+
+<!-- ============================== 6 ============================== -->
+<section>
+<h2><span class="num">6</span>Gráficos</h2>
+<p>Os gráficos foram gerados pelo <strong>painel interativo</strong> do projeto (<code>dashboards/painel_academico_interativo.html</code>, um arquivo HTML que funciona sem internet), que recalcula as 15 consultas no navegador a partir das mesmas tabelas. O script <code>dashboards/validar.py</code> executa o SQL da seção 5 e confere que o painel devolve as mesmas linhas, com tolerância de arredondamento de 0,051. As figuras mostram o recorte padrão (todos os cursos e todos os semestres) na versão resumida que o painel usa para impressão. O painel também tem filtros por curso, semestre, coorte e disciplina, e cada consulta pode ser vista como tabela ou exportada em CSV. O repositório traz também um importador que cria as 15 consultas e os painéis no Metabase, e a equipe montou uma versão das consultas C1 a C12 no Looker Studio.</p>
+<figure><img src="figuras/painel.png" alt="Visão geral do painel interativo"><figcaption>Figura 0. Painel interativo: filtros globais, cinco páginas temáticas e indicadores-resumo do recorte.</figcaption></figure>
+<div class="box warn"><p><strong>Como ler os resultados.</strong> Os dados são sintéticos. Alguns efeitos foram programados no gerador de propósito: disciplinas com dificuldades diferentes, primeiros períodos mais difíceis, notas mais altas em 2020 e 2021 e uma pequena vantagem de habilidade nas faixas de renda mais altas. A cota e a bolsa são sorteadas sem efeito sobre o desempenho. Um padrão nos gráficos é, portanto, a demonstração de que a consulta detecta o que foi simulado, e não uma descoberta sobre a UFPE.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C1</span><h3>Barras horizontais empilhadas, ordenadas</h3></div>
+<p class="meta">Por que: o ranking ordenado mostra de imediato as disciplinas mais críticas, e o empilhamento separa o motivo da reprovação. Reprovação por nota pede monitoria; reprovação por falta pede acompanhamento da frequência.</p>
+<figure><img src="figuras/C1.png" alt="C1"><figcaption>Figura 1. Cinco maiores taxas de reprovação de cada curso em 2025.2.</figcaption></figure></div>
+<p>Em 2025.2, as maiores taxas estão em Introdução à Programação no SI (55,9%) e em Cálculo 1 na EC (53,3%) e no CC (44,4%). A parcela por falta é pequena em quase todas. Na base inteira, a reprovação é de 20,5% por nota contra 2,1% por falta, o que indica que a ação prioritária é pedagógica.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C2</span><h3>Barras empilhadas em 100% por coorte</h3></div>
+<p class="meta">Por que: concluído, ativo e evadido são partes exclusivas de um mesmo todo. A barra de 100% mostra o perfil da coorte sem que o tamanho da turma interfira.</p>
+<figure><img src="figuras/C2.png" alt="C2"><figcaption>Figura 2. Situação final das coortes 2018.1, 2020.1, 2022.1 e 2024.1 de cada curso.</figcaption></figure></div>
+<p>A coorte de 2018.1 já fechou: o SI concluiu 72,2%, o CC 40,0% e a EC, de curso mais longo, 36,8%. Nas coortes seguintes, a parcela ativa cresce porque ainda não houve tempo de concluir: em 2024.1 ela vai de 55,6% a 68,2%. Por isso a evasão de coortes recentes não é uma taxa final. Somando as coortes de 2018 e 2019, o SI concluiu 48,1% e evadiu 51,9%, o CC 41,9% e 57,0%, e a EC 31,8% e 65,9%.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C3</span><h3>Linhas por semestre, uma por grupo e curso</h3></div>
+<p class="meta">Por que: a pergunta é sobre a trajetória de dois grupos no tempo. Linhas com o semestre no eixo horizontal mostram se a distância entre eles se mantém.</p>
+<figure><img src="figuras/C3.png" alt="C3"><figcaption>Figura 3. Reprovação de matrículas com e sem assistência estudantil, por curso e semestre.</figcaption></figure></div>
+<p>As curvas andam juntas, com os beneficiários um pouco abaixo (21,3% contra 22,8% na base inteira). A diferença é de composição, não de efeito: no gerador a bolsa é sorteada e só começa no 2º semestre, então os calouros, que reprovam mais (C4), estão todos no grupo sem assistência. É o tipo de confusão que o painel avisa no “Como interpretar”.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C4</span><h3>Barras empilhadas por período do aluno</h3></div>
+<p class="meta">Por que: o período é ordinal, a altura da barra é a taxa total e o empilhamento preserva o peso de cada motivo. Usar taxa, e não contagem, evita confundir volume de matrículas com risco.</p>
+<figure><img src="figuras/C4.png" alt="C4"><figcaption>Figura 4. Reprovação por nota e por falta conforme os semestres desde o ingresso.</figcaption></figure></div>
+<p>A reprovação por nota é de 30,5% e 30,3% nos dois primeiros semestres e cai para 19,8% no terceiro e 14,1% do nono em diante. A reprovação por falta cai de 4,0% para 1,2%. O começo do curso é o ponto crítico, o que justifica concentrar o acolhimento nele.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C5</span><h3>Ranking de barras com o número de alunos afetados</h3></div>
+<p class="meta">Por que: o ranking prioriza onde a dificuldade se repete, e o número entre parênteses impede que uma taxa alta sobre poucos alunos pareça mais grave do que é.</p>
+<figure><img src="figuras/C5.png" alt="C5"><figcaption>Figura 5. Disciplinas com maior proporção de alunos que reprovaram duas ou mais vezes.</figcaption></figure></div>
+<p>Cálculo 1 lidera na EC (20,0%: 72 de 360 alunos) e no CC (16,8%: 65 de 387). No SI, a primeira é Introdução à Programação (13,6%: 48 de 353). São as mesmas disciplinas de entrada da C1, agora vistas como gargalo persistente.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C6</span><h3>Linhas por semestre, uma por disciplina crítica</h3></div>
+<p class="meta">Por que: a continuidade temporal mostra melhora, piora e mudanças bruscas. A lista fixa de dez disciplinas permite comparar as mesmas ao longo de todos os semestres.</p>
+<figure><img src="figuras/C6.png" alt="C6"><figcaption>Figura 6. Aprovação das dez disciplinas críticas por semestre.</figcaption></figure></div>
+<p>As críticas são as de base matemática e de programação: Cálculo 1 e 2, Álgebra Linear e Vetorial, Física Geral 1 e 2, Matemática Discreta, Circuitos Elétricos, Introdução à Programação e Algoritmos e Estruturas de Dados. Somadas, a aprovação delas passa de cerca de 64% em 2018 e 2019 para 69,1% em 2020, efeito do período pandêmico simulado no gerador, e fica entre 59,5% e 65,4% nos anos seguintes.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C7</span><h3>Barras empilhadas em 100% por disciplina</h3></div>
+<p class="meta">Por que: com a mesma base percentual em todas as barras, a composição das cinco situações fica comparável entre disciplinas de tamanhos diferentes.</p>
+<figure><img src="figuras/C7.png" alt="C7"><figcaption>Figura 7. Composição das matrículas das disciplinas críticas no último semestre (cursos somados).</figcaption></figure></div>
+<p>Separar a aprovação na final da aprovação direta mostra quanto da aprovação depende da segunda chance. O trancamento, de 4,0% na base, aparece como parcela própria em vez de sumir do denominador.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C8</span><h3>Barras ordenadas por grupo de cota e renda</h3></div>
+<p class="meta">Por que: a análise original previa dois mapas de calor (cota × faixa). Com 6 cotas × 4 faixas × 3 cursos, muitas células ficam com poucos alunos, e o painel usa barras ordenadas com o <em>n</em> de cada grupo no rótulo, alternando entre reprovação e evasão.</p>
+<figure class="tall"><img src="figuras/C8.png" alt="C8"><figcaption>Figura 8. Os seis grupos de maior reprovação, com a evasão dos mesmos grupos. Os extremos são grupos pequenos (n no rótulo).</figcaption></figure></div>
+<p>Por faixa de renda, a evasão das coortes desde 2018 vai de 44,2% (acima de 5 SM) a 48,0% (até 1,5 SM), coerente com o efeito de renda programado. Entre cotas, as diferenças (de 39,3% em escola pública e renda a 48,8% em ampla concorrência) são acaso: no gerador a cota não tem efeito nenhum. O gráfico mostra o tamanho de cada grupo justamente para frear essa leitura.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C9</span><h3>Dispersão: média de faltas × reprovação</h3></div>
+<p class="meta">Por que: são duas medidas numéricas da mesma oferta, e a dispersão mostra a relação e os pontos atípicos ao mesmo tempo.</p>
+<figure><img src="figuras/C9.png" alt="C9"><figcaption>Figura 9. Uma bolinha por oferta e curso (2.140 ofertas).</figcaption></figure></div>
+<p>A correlação entre média de faltas e taxa de reprovação nas 2.139 ofertas com faltas registradas é de 0,71. Ofertas acima da nuvem (muita reprovação com pouca falta) apontam problema de aprendizagem, e não de frequência.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C10</span><h3>Barras divergentes em pontos percentuais</h3></div>
+<p class="meta">Por que: o zero é o histórico da própria disciplina, então a direção e o tamanho do desvio são a informação. Comparar com a própria disciplina evita punir quem leciona disciplinas difíceis.</p>
+<figure><img src="figuras/C10.png" alt="C10"><figcaption>Figura 10. Maiores desvios de turmas do último semestre em relação ao histórico.</figcaption></figure></div>
+<p>Das 1.516 turmas comparáveis (10 ou mais matrículas e algum histórico), 105 ficaram a 20 pontos ou mais do histórico, com extremos de +36,5 e −33,8 pontos. São casos para investigar o contexto da turma, não um ranking de professores.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C11</span><h3>Barras de duração com marcador do prazo</h3></div>
+<p class="meta">Por que: realizado e prazo ficam na mesma escala, e cada curso é comparado ao seu próprio prazo (8, 9 ou 10 semestres).</p>
+<figure><img src="figuras/C11.png" alt="C11"><figcaption>Figura 11. Duração média dos concluintes por coorte; o traço escuro é o prazo previsto.</figcaption></figure></div>
+<p>Em média, as coortes concluem 1,5 (EC e SI) a 1,8 semestre (CC) além do prazo. Atenção ao viés de sobrevivência: nas coortes recentes, só os mais rápidos já concluíram, então a média delas parece melhor do que será. C15 complementa essa leitura com a parcela que concluiu.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C12</span><h3>Tabela comparativa</h3></div>
+<p class="meta">Por que: taxa, nota e número de matrículas têm escalas diferentes e todos importam. Uma tabela é mais honesta do que forçar três unidades num mesmo eixo. Na tela, o painel oferece também barras de aprovação por oferta.</p>
+<figure><img src="figuras/C12.png" alt="C12"><figcaption>Figura 12. Ofertas de Álgebra Linear por semestre, turma e docente.</figcaption></figure></div>
+<p>A turma B de 2025.2 aparece duas vezes, uma para cada docente, com os mesmos números: a ponte mostra a oferta para cada professor sem multiplicar matrículas nos totais. Nos dados sintéticos, o professor não influencia o resultado.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C13</span><h3>Mapa de calor: período na matriz × semestre</h3></div>
+<p class="meta">Por que: os dois eixos são ordinais e a pergunta é onde o atraso se concentra. A cor permite ver 160 células de uma vez, e o número dá o valor exato.</p>
+<figure><img src="figuras/C13.png" alt="C13"><figcaption>Figura 13. Atraso médio, em semestres, das matrículas de cada período da matriz em cada semestre (cursos ponderados pelas matrículas).</figcaption></figure></div>
+<p>O atraso cresce com o período da matriz: em média 0,6 semestre nas disciplinas do 1º período e cerca de 2,5 nas do 5º ao 7º. Do 4º período em diante, mais de 92% das matrículas são de alunos atrasados, contra 38% no 1º período. O atraso alto também mostra um limite conhecido do gerador: ele não simula alunos que cursam disciplinas extras para recuperar o atraso, e por isso quase ninguém conclui no prazo. A consulta usa pela primeira vez a matriz curricular, que antes só era usada na validação.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C14</span><h3>Linhas por ano, uma por curso</h3></div>
+<p class="meta">Por que: a TSG é um indicador anual acompanhado como série. A linha mostra a tendência de cada curso na mesma escala de 0 a 100%.</p>
+<figure><img src="figuras/C14.png" alt="C14"><figcaption>Figura 14. Taxa de Sucesso na Graduação por curso e ano.</figcaption></figure></div>
+<table>
+<thead><tr><th>Curso</th><th class="n">2022</th><th class="n">2023</th><th class="n">2024</th><th class="n">2025</th></tr></thead>
+<tbody>
+<tr><td>CC (prazo 9)</td><td class="n">43,9% (18/41)</td><td class="n">33,3% (15/45)</td><td class="n">33,3% (18/54)</td><td class="n">45,5% (20/44)</td></tr>
+<tr><td>EC (prazo 10)</td><td class="n">—</td><td class="n">37,8% (17/45)</td><td class="n">35,6% (16/45)</td><td class="n">40,4% (19/47)</td></tr>
+<tr><td>SI (prazo 8)</td><td class="n">31,7% (13/41)</td><td class="n">47,6% (20/42)</td><td class="n">47,8% (22/46)</td><td class="n">39,6% (19/48)</td></tr>
+</tbody></table>
+<p>A série começa em 2022 (2023 na EC) porque os anos anteriores dependeriam de coortes truncadas. A TSG não é aditiva entre cursos: cada curso tem um prazo e, portanto, um ano-base diferente no denominador. A taxa da instituição se calcula somando concluintes e ingressantes previstos, nunca tirando a média das taxas.</p></div>
+
+<div class="q"><div class="keep"><div class="qhead"><span class="id">C15</span><h3>Barras empilhadas em 100% por ano</h3></div>
+<p class="meta">Por que: TAP, TCA e TDA são exclusivas e somam 100% em todo ano. A barra de 100% mostra a composição e a sua evolução sem sugerir que o total mudou. Cada barra é o fim de um ano da mesma turma.</p>
+<figure class="tall"><img src="figuras/C15.png" alt="C15"><figcaption>Figura 15. Turma de ingresso 2018.1: permanência (TAP), conclusão acumulada (TCA) e desistência acumulada (TDA) no fim de cada ano.</figcaption></figure></div>
+<p>Na turma 2018.1, a desistência aparece logo no primeiro ano (22% a 26%), a conclusão só começa perto do prazo previsto, e a permanência vai a zero quando a turma fecha. A trajetória termina com 72,2% de conclusão no SI, 40,0% no CC e 36,8% na EC. É a mesma informação da C2, agora reconstituída ano a ano, o que só o snapshot do vínculo permite.</p></div>
+</section>
+
+<!-- ============================== 7 ============================== -->
+<section>
+<h2><span class="num">7</span>Validação, reprodução e limites</h2>
+<h3>7.1 Validação</h3>
+<ul>
+  <li><strong>19 testes de consistência</strong> em <code>sql/06_validacao.sql</code>, todos com zero erros. Entre eles: as duas estrelas têm as mesmas matrículas, notas e faltas; as situações e as faixas de nota fecham com os totais; a nota é coerente com a situação; não há matrícula antes do ingresso nem depois da saída; os pesos da ponte somam 1; o snapshot coincide com <code>dim_aluno</code>; e TAP + TCA + TDA = 100% em cada turma e ano. Este último teste foi confirmado com uma quebra proposital: alterar uma única linha do snapshot gera um erro.</li>
+  <li><strong>Painel contra SQL:</strong> <code>dashboards/validar.py</code> executa as 15 consultas e compara com o painel linha a linha, além de testar filtros combinados e o recorte vazio.</li>
+</ul>
+<h3>7.2 Como reproduzir</h3>
+<pre class="sql">./scripts/carregar.sh -uroot -p                  # gera os dados, cria o banco, deriva agregada e snapshot, roda os 19 testes
+mysql -uroot -p --table &lt; sql/05_consultas.sql   # as 15 consultas
+python3 scripts/exportar_csv.py -uroot -p        # atualiza dados/csv
+python3 dashboards/build_demo.py                 # remonta o painel e os SQLs do Metabase
+python3 dashboards/validar.py                    # confere o painel contra as consultas
+node scripts/gerar_relatorio.mjs                 # figuras e este PDF</pre>
+<h3>7.3 Limites que declaramos</h3>
+<ul>
+  <li><strong>Dados sintéticos.</strong> As taxas caem em faixas plausíveis para cursos de computação, mas não descrevem a UFPE nem qualquer instituição.</li>
+  <li><strong>Conclusão no prazo é rara</strong> (C11, C13): o gerador não simula alunos que cursam disciplinas extras para recuperar o atraso.</li>
+  <li><strong>Hierarquia sem variação</strong> (departamento, centro e campus iguais nos três cursos): o <em>roll-up</em> é possível no esquema, mas não mostra nada nestes dados.</li>
+  <li><strong>Matriz curricular única</strong>, embora os alunos tenham versões de currículo 2018 e 2024.</li>
+  <li><strong>Coortes de 2014 a 2017 truncadas</strong>, excluídas dos indicadores de coorte.</li>
+  <li>Sexo e faixa etária ficaram fora do modelo por decisão de privacidade.</li>
+</ul>
+<h3>7.4 Referências</h3>
+<ul class="small">
+  <li>KIMBALL, R.; ROSS, M. <em>The Data Warehouse Toolkit</em>. 3. ed. Wiley, 2013 (processo em quatro passos, tipos de fato, SCD, dimensões conformadas, pontes).</li>
+  <li>INEP/DEED. <em>Metodologia de cálculo dos indicadores de fluxo da educação superior</em>, 2017 (TAP, TCA, TDA).</li>
+  <li>UFRPE/PREG, Observatório de Dados da Graduação. <em>Relatório analítico sobre controle de evasão e de retenção na UFRPE</em>, 2021 (TSG e fórmulas de evasão).</li>
+  <li>UFPB/STI. Painel público <em>Indicadores Graduação</em> (Metabase), metabase.ufpb.br.</li>
+</ul>
+</section>
+</body>
+</html>

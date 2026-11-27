@@ -33,6 +33,8 @@ ainda carrega número velho é o `docs/entrega_05_11.pdf`, que é binário e pre
 
 ## 2. O alvo é o roteiro do professor
 
+> **Atualização de 27/11/2026:** as seis seções estão em `docs/relatorio_final.pdf`. F2 e F3 foram feitas (C13 atraso curricular, C14 TSG, snapshot `fato_vinculo_semestre` e C15 TAP/TCA/TDA, com o teste da identidade do INEP), F4 está no texto do relatório e F5 no painel. A comparação Lobo × coorte ficou de fora: a definição de M(n) (com ou sem os desvinculados do ano) muda o resultado, e o número do `ciclo_23_11.pdf` não tem consulta no repositório que o reproduza.
+
 O relatório pedido tem seis seções. Elas são o critério de pronto deste ciclo:
 
 | Seção do roteiro | Nosso estado hoje | Frente |
